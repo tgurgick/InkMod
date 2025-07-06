@@ -31,7 +31,7 @@ def cli():
 @click.option('--output-file', '-o', help='Save output to file')
 @click.option('--temperature', '-t', default=0.7, help='OpenAI temperature (0.0-1.0)')
 @click.option('--max-tokens', '-m', default=1000, help='Maximum tokens for response')
-@click.option('--model', default='gpt-3.5-turbo', help='OpenAI model to use')
+@click.option('--model', default=None, help='OpenAI model to use')
 @click.option('--prompt-type', default='default', help='Prompt template type')
 @click.option('--show-analysis', is_flag=True, help='Show detailed style analysis')
 @click.option('--edit-mode', is_flag=True, help='Enable interactive editing mode')
@@ -96,7 +96,7 @@ def generate(style_folder, input, output_file, temperature, max_tokens, model, p
 @click.option('--output-file', '-o', help='Save outputs to file')
 @click.option('--temperature', '-t', default=0.7, help='OpenAI temperature (0.0-1.0)')
 @click.option('--max-tokens', '-m', default=1000, help='Maximum tokens for response')
-@click.option('--model', default='gpt-3.5-turbo', help='OpenAI model to use')
+@click.option('--model', default=None, help='OpenAI model to use')
 def batch(style_folder, input_file, output_file, temperature, max_tokens, model):
     """Process multiple inputs in batch mode."""
     
@@ -184,7 +184,7 @@ def batch(style_folder, input_file, output_file, temperature, max_tokens, model)
 @click.option('--style-folder', '-s', required=True, help='Folder containing writing style samples')
 @click.option('--temperature', '-t', default=0.7, help='OpenAI temperature (0.0-1.0)')
 @click.option('--max-tokens', '-m', default=1000, help='Maximum tokens for response')
-@click.option('--model', default='gpt-3.5-turbo', help='OpenAI model to use')
+@click.option('--model', default=None, help='OpenAI model to use')
 def interactive(style_folder, temperature, max_tokens, model):
     """Start interactive mode for real-time style mirroring."""
     

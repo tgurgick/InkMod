@@ -20,22 +20,21 @@ git clone https://github.com/yourusername/inkmod.git
 cd inkmod
 ```
 
-2. Install dependencies:
+2. Install dependencies and the CLI tool:
 ```bash
-pip install -r requirements.txt
+pip install -e .
 ```
 
-3. Set up your OpenAI API key:
+3. Set up your OpenAI API key and model in a `.env` file (or as environment variables):
 ```bash
-export OPENAI_API_KEY="your-api-key-here"
-```
-
-Or create a `.env` file:
-```
 OPENAI_API_KEY=your-api-key-here
+OPENAI_MODEL=gpt-4o  # Default model is gpt-4o
 ```
 
-**Note**: You'll need a valid OpenAI API key to use the generation features. The analyze command works without an API key.
+**Note:**
+- The CLI will use the model specified in your `.env` file (`OPENAI_MODEL`).
+- If not set, it defaults to `gpt-4o`.
+- You can override the model at runtime with the `--model` flag.
 
 ## Usage
 
@@ -43,28 +42,35 @@ OPENAI_API_KEY=your-api-key-here
 
 Generate a response in a specific style:
 ```bash
-inkmod --style-folder ./writing-samples --input "Write a professional email response"
+inkmod generate --style-folder ./writing-samples --input "Write a professional email response"
+```
+
+### Using a Different Model
+
+Override the model at runtime:
+```bash
+inkmod generate --style-folder ./writing-samples --input "Write a professional email response" --model gpt-3.5-turbo
 ```
 
 ### Interactive Mode
 
 Start an interactive session:
 ```bash
-inkmod --style-folder ./writing-samples --interactive
+inkmod interactive --style-folder ./writing-samples
 ```
 
 ### Batch Processing
 
 Process multiple inputs from a file:
 ```bash
-inkmod --style-folder ./writing-samples --input-file inputs.txt --output-file outputs.txt
+inkmod batch --style-folder ./writing-samples --input-file inputs.txt --output-file outputs.txt
 ```
 
 ### Edit Mode (with feedback)
 
 Generate and edit responses while capturing feedback:
 ```bash
-inkmod --style-folder ./writing-samples --input "Write a blog post" --edit-mode
+inkmod generate --style-folder ./writing-samples --input "Write a blog post" --edit-mode
 ```
 
 ## Writing Samples
@@ -82,14 +88,16 @@ writing-samples/
 
 ## Configuration
 
-You can configure various parameters:
+You can configure various parameters in your `.env` file or via CLI flags:
 
 ```bash
-# Set model parameters
-inkmod --style-folder ./samples --input "Write something" --temperature 0.7 --max-tokens 500
+# Set model parameters in .env
+OPENAI_MODEL=gpt-4o
+OPENAI_MAX_TOKENS=1000
+OPENAI_TEMPERATURE=0.7
 
-# Use different OpenAI model
-inkmod --style-folder ./samples --input "Write something" --model gpt-4
+# Or override at runtime
+inkmod generate --style-folder ./samples --input "Write something" --temperature 0.7 --max-tokens 500 --model gpt-4o
 ```
 
 ## Development
