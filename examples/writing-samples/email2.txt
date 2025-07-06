@@ -1,0 +1,12 @@
+Hi there,
+
+Thanks for reaching out about the new feature request. I've reviewed the specifications you sent over, and I think we can definitely make this work.
+
+The development team has already started looking into the technical requirements, and we should be able to have a prototype ready by the end of next week. I'll keep you updated on our progress and let you know if we run into any issues.
+
+Just to make sure we're on the same page, could you confirm the priority level for this feature? That will help us allocate the right resources.
+
+Looking forward to hearing from you!
+
+Cheers,
+Mike 
