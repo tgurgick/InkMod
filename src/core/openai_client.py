@@ -48,8 +48,8 @@ class OpenAIClient:
         prompt_tokens = self.count_tokens(prompt)
         estimated_completion_tokens = max_tokens
         
-        console.info(f"Prompt tokens: {prompt_tokens}")
-        console.info(f"Estimated cost: ${self.estimate_cost(prompt_tokens, estimated_completion_tokens):.4f}")
+        console.print(f"📊 Prompt tokens: {prompt_tokens}")
+        console.print(f"💰 Estimated cost: ${self.estimate_cost(prompt_tokens, estimated_completion_tokens):.4f}")
         
         try:
             with Progress() as progress:

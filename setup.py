@@ -23,11 +23,11 @@ setup(
     url="https://github.com/yourusername/inkmod",
     packages=find_packages(where="src"),
     package_dir={"": "src"},
-    py_modules=["inkmod"],
+    py_modules=[],
     install_requires=requirements,
     entry_points={
         "console_scripts": [
-            "inkmod=inkmod:main",
+            "inkmod=cli.commands:cli",
         ],
     },
     classifiers=[

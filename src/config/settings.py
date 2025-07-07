@@ -32,4 +32,21 @@ class Settings:
         return True
 
 # Global settings instance
-settings = Settings() 
+settings = Settings()
+
+def load_config() -> dict:
+    """Load configuration as a dictionary for compatibility."""
+    return {
+        'openai': {
+            'api_key': settings.OPENAI_API_KEY,
+            'model': settings.OPENAI_MODEL,
+            'max_tokens': settings.OPENAI_MAX_TOKENS,
+            'temperature': settings.OPENAI_TEMPERATURE
+        },
+        'app': {
+            'default_style_folder': settings.DEFAULT_STYLE_FOLDER,
+            'feedback_file': settings.FEEDBACK_FILE,
+            'max_sample_size': settings.MAX_SAMPLE_SIZE,
+            'max_total_samples': settings.MAX_TOTAL_SAMPLES
+        }
+    } 

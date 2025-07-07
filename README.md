@@ -8,16 +8,18 @@ InkMod is an open-source CLI tool that analyzes a user's writing style from prov
 
 - **Style Analysis**: Analyze writing samples to understand tone, vocabulary, and structure
 - **Style Mirroring**: Generate responses that match the analyzed writing style
+- **Style Validation**: Compare different analysis methods and validate their effectiveness
 - **Interactive Mode**: Real-time style mirroring with immediate feedback
 - **Batch Processing**: Process multiple inputs at once
 - **Feedback System**: Capture user edits to improve future generations
+- **AI-Powered Analysis**: Use OpenAI to generate nuanced style guides
 
 ## Installation
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/inkmod.git
-cd inkmod
+git clone https://github.com/tgurgick/InkMod.git
+cd InkMod
 ```
 
 2. Install dependencies and the CLI tool:
@@ -43,6 +45,13 @@ OPENAI_MODEL=gpt-4o  # Default model is gpt-4o
 Generate a response in a specific style:
 ```bash
 inkmod generate --style-folder ./writing-samples --input "Write a professional email response"
+```
+
+### Style Validation
+
+Compare different style analysis methods:
+```bash
+inkmod validate --style-folder ./writing-samples --test-input "Write a friendly follow-up email about a missed meeting"
 ```
 
 ### Using a Different Model
@@ -72,6 +81,54 @@ Generate and edit responses while capturing feedback:
 ```bash
 inkmod generate --style-folder ./writing-samples --input "Write a blog post" --edit-mode
 ```
+
+## Sample Output
+
+### Style Validation Results
+
+When you run the validation command, you'll see a comparison of different style analysis methods:
+
+```
+============================================================
+Style Analysis Method Comparison
+============================================================
+                            Method Comparison                             
+┏━━━━━━━━┳━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━━━┓
+┃ Method ┃ Similarity Score ┃ Generation Cost ┃ Total Cost ┃ Best Method ┃
+┡━━━━━━━━╇━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━━━━┩
+│ Rigid  │            0.315 │         $0.0254 │    $0.0254 │     ⭐      │
+│ Ai     │            0.308 │         $0.0491 │    $0.1203 │             │
+│ Direct │            0.234 │         $0.0239 │    $0.0239 │             │
+└────────┴──────────────────┴─────────────────┴────────────┴─────────────┘
+
+╭─────────────────────────────────────── 🎯 Analysis Recommendation ────────────────────────────────────────╮
+│ Recommendation: Rigid metrics analysis performed best (similarity: 0.32) and is cost-effective ($0.0254). │
+╰───────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+Sample Outputs:
+
+Rigid Method:
+Hi there,
+
+I hope you're doing well. I wanted to touch base regarding the meeting we missed yesterday. I understand that
+things can get hectic, and I just want to make sure we can reschedule at a time...
+
+Ai Method:
+Hi [Recipient's Name],
+
+Thanks for your note about the meeting we missed. I completely understand that things can get hectic, and I'm
+glad we're able to touch base now.
+
+The team and I are keen to cat...
+
+Direct Method:
+Hi there,
+
+I hope you're doing well. I wanted to follow up regarding our meeting that was scheduled for yesterday. I 
+understand things can get hectic, and it's easy for appointments to slip through th...
+```
+
+This validation helps you understand which method best matches your writing style and provides cost analysis for each approach.
 
 ## Writing Samples
 
@@ -104,6 +161,7 @@ inkmod generate --style-folder ./samples --input "Write something" --temperature
 
 ### Current Status
 - ✅ **MVP Complete**: Core functionality implemented
+- ✅ **Style Validation**: Compare different analysis methods
 - 🔄 **Phase 2**: Enhanced feedback system (in progress)
 - 📋 **Phase 3**: Advanced features and templates (planned)
 - 🌐 **Phase 4**: Web frontend (planned)
@@ -113,7 +171,7 @@ inkmod generate --style-folder ./samples --input "Write something" --temperature
 inkmod/
 ├── src/
 │   ├── cli/          # CLI commands and interface
-│   ├── core/         # Core functionality (OpenAI, style analysis)
+│   ├── core/         # Core functionality (OpenAI, style analysis, validation)
 │   ├── utils/        # File processing and text utilities
 │   └── config/       # Settings and configuration
 ├── examples/         # Sample writing files for testing

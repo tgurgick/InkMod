@@ -4,6 +4,7 @@ import json
 import sys
 from typing import Optional, List
 from pathlib import Path
+from datetime import datetime
 
 import click
 from rich.console import Console
@@ -15,7 +16,7 @@ from core.style_analyzer import StyleAnalyzer
 from core.openai_client import OpenAIClient
 from core.prompt_engine import PromptEngine
 from utils.file_processor import FileProcessor
-from config.settings import settings
+from config.settings import settings, load_config
 
 console = Console()
 
@@ -270,6 +271,57 @@ def analyze(style_folder):
     except Exception as e:
         console.print(f"Error: {e}")
         sys.exit(1)
+
+@cli.command()
+@click.option('--style-folder', '-s', required=True, help='Folder containing writing style samples')
+@click.option('--test-input', '-t', required=True, help='Test input to generate content for')
+@click.option('--model', '-m', help='OpenAI model to use (defaults to config)')
+@click.option('--temperature', '-temp', type=float, default=0.7, help='Temperature for generation')
+@click.option('--max-tokens', type=int, default=500, help='Maximum tokens to generate')
+def validate(style_folder: str, test_input: str, model: str, temperature: float, max_tokens: int):
+    """Compare different style analysis methods and validate their effectiveness."""
+    
+    try:
+        # Initialize components
+        config = load_config()
+        openai_client = OpenAIClient(
+            api_key=config['openai']['api_key'],
+            model=model or config['openai']['model']
+        )
+        
+        # Load style samples
+        file_processor = FileProcessor()
+        samples = file_processor.process_style_folder(style_folder)
+        
+        if not samples:
+            console.print("❌ No style samples found in the specified folder.")
+            return
+        
+        console.print(f"📁 Loaded {len(samples)} style samples from {style_folder}")
+        
+        # Initialize validator
+        from core.style_validator import StyleValidator
+        validator = StyleValidator(openai_client)
+        
+        # Run comparison (pass temperature and max_tokens)
+        comparison_result = validator.compare_analysis_methods(samples, test_input, temperature=temperature, max_tokens=max_tokens)
+        
+        # Display results
+        validator.display_comparison_results(comparison_result)
+        
+        # Save results to file
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        results_file = f"validation_results_{timestamp}.json"
+        
+        with open(results_file, 'w') as f:
+            json.dump(comparison_result, f, indent=2)
+        
+        console.print(f"\n💾 Results saved to {results_file}")
+        
+    except Exception as e:
+        console.print(f"❌ Validation failed: {e}")
+        if config.get('debug', False):
+            console.print_exception()
 
 def _handle_edit_mode(original_response: str, user_input: str, style_folder: str) -> str:
     """Handle interactive editing mode."""
