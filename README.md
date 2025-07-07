@@ -9,6 +9,7 @@ InkMod is an open-source CLI tool that analyzes a user's writing style from prov
 - **Style Analysis**: Analyze writing samples to understand tone, vocabulary, and structure
 - **Style Mirroring**: Generate responses that match the analyzed writing style
 - **Style Validation**: Compare different analysis methods and validate their effectiveness
+- **Reinforcement Learning**: Train a local model using OpenAI as teacher
 - **Interactive Mode**: Real-time style mirroring with immediate feedback
 - **Batch Processing**: Process multiple inputs at once
 - **Feedback System**: Capture user edits to improve future generations
@@ -53,6 +54,15 @@ Compare different style analysis methods:
 ```bash
 inkmod validate --style-folder ./writing-samples --test-input "Write a friendly follow-up email about a missed meeting"
 ```
+
+### Reinforcement Learning Training
+
+Train a local model using OpenAI as teacher:
+```bash
+inkmod train --style-folder ./writing-samples --test-prompts test_prompts.txt --iterations 5
+```
+
+This creates a local model that learns your writing style and can generate responses without API calls.
 
 ### Using a Different Model
 
@@ -130,6 +140,43 @@ understand things can get hectic, and it's easy for appointments to slip through
 
 This validation helps you understand which method best matches your writing style and provides cost analysis for each approach.
 
+### Reinforcement Learning Training
+
+The training system shows how a local model learns from OpenAI feedback:
+
+```
+🎯 Starting reinforcement learning training...
+
+📚 Phase 1: Initial local model training
+🧠 Training local style model...
+✅ Initial training complete: 266 vocabulary items
+
+🔄 Iteration 1/2
+📊 Iteration 1 performance: 0.100
+
+🔄 Iteration 2/2
+📊 Iteration 2 performance: 0.140
+
+============================================================
+Reinforcement Learning Training Results
+============================================================
+                  Performance Progression                  
+┏━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━┓
+┃ Iteration ┃ Avg Score ┃ Min Score ┃ Max Score ┃    Cost ┃
+┡━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━┩
+│ 1         │     0.100 │     0.100 │     0.100 │ $0.1461 │
+│ 2         │     0.140 │     0.100 │     0.200 │ $0.1446 │
+└───────────┴───────────┴───────────┴───────────┴─────────┘
+
+🎯 Final Performance: 0.120
+💰 Total Training Cost: $0.2908
+
+💰 Cost Comparison:
+   Local Model Cost: $0.0000
+   OpenAI Cost: $0.1262
+   Potential Savings: $0.1262
+```
+
 ## Writing Samples
 
 Create a folder with text files containing writing samples. The tool will analyze these files to understand the writing style.
@@ -162,6 +209,7 @@ inkmod generate --style-folder ./samples --input "Write something" --temperature
 ### Current Status
 - ✅ **MVP Complete**: Core functionality implemented
 - ✅ **Style Validation**: Compare different analysis methods
+- ✅ **Reinforcement Learning**: Local model training with OpenAI teacher
 - 🔄 **Phase 2**: Enhanced feedback system (in progress)
 - 📋 **Phase 3**: Advanced features and templates (planned)
 - 🌐 **Phase 4**: Web frontend (planned)
@@ -171,7 +219,7 @@ inkmod generate --style-folder ./samples --input "Write something" --temperature
 inkmod/
 ├── src/
 │   ├── cli/          # CLI commands and interface
-│   ├── core/         # Core functionality (OpenAI, style analysis, validation)
+│   ├── core/         # Core functionality (OpenAI, style analysis, validation, local models)
 │   ├── utils/        # File processing and text utilities
 │   └── config/       # Settings and configuration
 ├── examples/         # Sample writing files for testing

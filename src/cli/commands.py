@@ -323,6 +323,77 @@ def validate(style_folder: str, test_input: str, model: str, temperature: float,
         if config.get('debug', False):
             console.print_exception()
 
+@cli.command()
+@click.option('--style-folder', '-s', required=True, help='Folder containing writing style samples')
+@click.option('--test-prompts', '-t', required=True, help='File containing test prompts (one per line)')
+@click.option('--iterations', '-i', type=int, default=5, help='Number of training iterations')
+@click.option('--model', '-m', help='OpenAI model to use (defaults to config)')
+@click.option('--output-file', '-o', help='Save training results to file')
+def train(style_folder: str, test_prompts: str, iterations: int, model: str, output_file: str):
+    """Train a local style model using OpenAI as teacher (reinforcement learning)."""
+    
+    try:
+        # Initialize components
+        config = load_config()
+        openai_client = OpenAIClient(
+            api_key=config['openai']['api_key'],
+            model=model or config['openai']['model']
+        )
+        
+        # Load style samples
+        file_processor = FileProcessor()
+        samples = file_processor.process_style_folder(style_folder)
+        
+        if not samples:
+            console.print("❌ No style samples found in the specified folder.")
+            return
+        
+        console.print(f"📁 Loaded {len(samples)} style samples from {style_folder}")
+        
+        # Load test prompts
+        try:
+            with open(test_prompts, 'r') as f:
+                test_prompt_list = [line.strip() for line in f if line.strip()]
+        except FileNotFoundError:
+            console.print(f"❌ Test prompts file not found: {test_prompts}")
+            return
+        
+        if not test_prompt_list:
+            console.print("❌ No test prompts found in file.")
+            return
+        
+        console.print(f"📝 Loaded {len(test_prompt_list)} test prompts")
+        
+        # Initialize reinforcement trainer
+        from core.reinforcement_trainer import ReinforcementTrainer
+        trainer = ReinforcementTrainer(openai_client)
+        
+        # Start training
+        results = trainer.train_with_reinforcement(samples, test_prompt_list, iterations)
+        
+        # Display results
+        trainer.display_training_results(results)
+        
+        # Save results
+        if output_file:
+            trainer.save_training_results(results, output_file)
+        else:
+            trainer.save_training_results(results)
+        
+        # Compare final models
+        console.print("\n🔍 Comparing Local vs OpenAI Models...")
+        comparison = trainer.compare_models(test_prompt_list, samples)
+        
+        console.print(f"\n💰 Cost Comparison:")
+        console.print(f"   Local Model Cost: ${comparison['comparison']['total_local_cost']:.4f}")
+        console.print(f"   OpenAI Cost: ${comparison['comparison']['total_openai_cost']:.4f}")
+        console.print(f"   Potential Savings: ${comparison['comparison']['cost_savings']:.4f}")
+        
+    except Exception as e:
+        console.print(f"❌ Training failed: {e}")
+        if config.get('debug', False):
+            console.print_exception()
+
 def _handle_edit_mode(original_response: str, user_input: str, style_folder: str) -> str:
     """Handle interactive editing mode."""
     console.print("\n[bold yellow]Edit Mode[/bold yellow]")
