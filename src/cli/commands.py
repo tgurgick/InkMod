@@ -394,6 +394,172 @@ def train(style_folder: str, test_prompts: str, iterations: int, model: str, out
         if config.get('debug', False):
             console.print_exception()
 
+@cli.command()
+@click.option('--style-folder', '-s', required=True, help='Folder containing writing style samples')
+@click.option('--test-prompts', '-t', required=True, help='File containing test prompts (one per line)')
+@click.option('--iterations', '-i', type=int, default=5, help='Number of training iterations')
+@click.option('--model', '-m', help='OpenAI model to use (defaults to config)')
+@click.option('--output-file', '-o', help='Save training results to file')
+@click.option('--use-lightweight-llm', is_flag=True, default=True, help='Use lightweight LLM for generation')
+@click.option('--backend', '-b', help='Local LLM backend to use (e.g., llama-7b, gpt4all-j, hf-distilgpt2)')
+def train_enhanced(style_folder: str, test_prompts: str, iterations: int, model: str, output_file: str, use_lightweight_llm: bool, backend: str):
+    """Train an enhanced local style model using lightweight LLM integration."""
+    
+    try:
+        # Initialize components
+        config = load_config()
+        openai_client = OpenAIClient(
+            api_key=config['openai']['api_key'],
+            model=model or config['openai']['model']
+        )
+        
+        # Load style samples
+        file_processor = FileProcessor()
+        samples = file_processor.process_style_folder(style_folder)
+        
+        if not samples:
+            console.print("❌ No style samples found in the specified folder.")
+            return
+        
+        console.print(f"📁 Loaded {len(samples)} style samples from {style_folder}")
+        
+        # Load test prompts
+        try:
+            with open(test_prompts, 'r') as f:
+                test_prompt_list = [line.strip() for line in f if line.strip()]
+        except FileNotFoundError:
+            console.print(f"❌ Test prompts file not found: {test_prompts}")
+            return
+        
+        if not test_prompt_list:
+            console.print("❌ No test prompts found in file.")
+            return
+        
+        console.print(f"📝 Loaded {len(test_prompt_list)} test prompts")
+        
+        # Initialize enhanced reinforcement trainer with backend
+        from core.enhanced_reinforcement_trainer import EnhancedReinforcementTrainer
+        trainer = EnhancedReinforcementTrainer(openai_client, backend_name=backend)
+        
+        # Set backend if specified
+        if backend:
+            console.print(f"🔧 Setting backend to: {backend}")
+            if not trainer.set_backend(backend):
+                console.print(f"⚠️  Backend '{backend}' not available, using default")
+                available_backends = trainer.get_available_backends()
+                if available_backends:
+                    console.print(f"Available backends: {', '.join(available_backends)}")
+        
+        # Configure lightweight LLM usage
+        trainer.local_model.use_local_llm = use_lightweight_llm
+        if use_lightweight_llm:
+            if backend:
+                console.print(f"🤖 Using local LLM backend: {backend}")
+            else:
+                console.print("🤖 Using lightweight LLM (GPT-3.5-turbo) for generation")
+        else:
+            console.print("📝 Using template-based generation")
+        
+        # Start enhanced training
+        results = trainer.train_with_reinforcement(samples, test_prompt_list, iterations)
+        
+        # Display enhanced results
+        trainer.display_enhanced_training_results(results)
+        
+        # Save results
+        if output_file:
+            trainer.save_enhanced_training_results(results, output_file)
+        else:
+            trainer.save_enhanced_training_results(results)
+        
+        # Compare enhanced models
+        console.print("\n🔍 Comparing Enhanced Local vs OpenAI Models...")
+        comparison = trainer.compare_enhanced_models(test_prompt_list, samples)
+        
+        console.print(f"\n💰 Enhanced Cost Comparison:")
+        console.print(f"   Enhanced Local Model Cost: ${comparison['comparison']['total_local_cost']:.4f}")
+        console.print(f"   OpenAI Cost: ${comparison['comparison']['total_openai_cost']:.4f}")
+        console.print(f"   Potential Savings: ${comparison['comparison']['cost_savings']:.4f}")
+        
+        # Show sample outputs
+        console.print("\n📄 Sample Enhanced Local Model Outputs:")
+        for i, result in enumerate(comparison['enhanced_local'][:3], 1):
+            console.print(f"\n{i}. Prompt: {result['prompt'][:50]}...")
+            console.print(f"   Response: {result['response'][:100]}...")
+        
+    except Exception as e:
+        console.print(f"❌ Enhanced training failed: {e}")
+        if config.get('debug', False):
+            console.print_exception()
+
+@cli.command()
+@click.option('--list', '-l', is_flag=True, help='List available backends')
+@click.option('--info', '-i', help='Get information about a specific backend')
+@click.option('--test', '-t', help='Test a specific backend with a sample prompt')
+def backends(list: bool, info: str, test: str):
+    """Manage local LLM backends."""
+    
+    try:
+        from core.llm_backends import create_backend_manager
+        
+        # Create backend manager
+        manager = create_backend_manager()
+        
+        if list:
+            console.print("🔧 Available Local LLM Backends:")
+            console.print("=" * 50)
+            
+            backends = manager.list_backends()
+            if not backends:
+                console.print("❌ No backends available")
+                return
+            
+            for backend in backends:
+                info = manager.get_backend_info(backend)
+                status = "✅ Loaded" if info.get('is_loaded', False) else "⏳ Not loaded"
+                console.print(f"  • {backend} - {status}")
+            
+            console.print("\n💡 To use a backend, specify it with --backend option in train commands")
+            console.print("   Example: inkmod train-enhanced --backend llama-7b")
+        
+        elif info:
+            backend_info = manager.get_backend_info(info)
+            if 'error' in backend_info:
+                console.print(f"❌ {backend_info['error']}")
+                return
+            
+            console.print(f"🔧 Backend Information: {info}")
+            console.print("=" * 50)
+            console.print(f"Type: {backend_info.get('backend', 'Unknown')}")
+            console.print(f"Model Path: {backend_info.get('model_path', 'Unknown')}")
+            console.print(f"Status: {'✅ Loaded' if backend_info.get('is_loaded', False) else '⏳ Not loaded'}")
+            console.print(f"Config: {backend_info.get('config', {})}")
+        
+        elif test:
+            if not manager.set_backend(test):
+                console.print(f"❌ Backend '{test}' not found")
+                return
+            
+            console.print(f"🧪 Testing backend: {test}")
+            console.print("=" * 50)
+            
+            test_prompt = "Write a short email about a meeting tomorrow."
+            console.print(f"Test prompt: {test_prompt}")
+            
+            response = manager.generate(test_prompt, max_tokens=100, temperature=0.7)
+            console.print(f"Response: {response}")
+        
+        else:
+            console.print("🔧 Backend Management")
+            console.print("Use --list to see available backends")
+            console.print("Use --info <backend> to get backend information")
+            console.print("Use --test <backend> to test a backend")
+    
+    except Exception as e:
+        console.print(f"❌ Backend management failed: {e}")
+        if config.get('debug', False):
+            console.print_exception()
+
 def _handle_edit_mode(original_response: str, user_input: str, style_folder: str) -> str:
     """Handle interactive editing mode."""
     console.print("\n[bold yellow]Edit Mode[/bold yellow]")

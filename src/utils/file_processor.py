@@ -19,6 +19,15 @@ class FileProcessor:
     def get_text_files(self, folder_path: str) -> List[str]:
         """Get all text files from a folder."""
         folder = Path(folder_path)
+        
+        # Security: Validate path is within safe directory
+        try:
+            folder = folder.resolve()  # Resolve any symlinks
+            if not folder.is_relative_to(Path.cwd()):
+                raise ValueError(f"Path {folder_path} is outside current working directory")
+        except (ValueError, RuntimeError):
+            raise ValueError(f"Invalid path: {folder_path}")
+        
         if not folder.exists():
             raise FileNotFoundError(f"Style folder not found: {folder_path}")
         

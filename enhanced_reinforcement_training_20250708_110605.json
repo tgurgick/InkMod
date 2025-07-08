@@ -1,0 +1,269 @@
+{
+  "initial_stats": {
+    "vocabulary_size": 266,
+    "sentence_patterns": 27,
+    "paragraph_patterns": 18,
+    "style_characteristics": {
+      "avg_sentence_length": 15.407407407407407,
+      "avg_word_length": 6.003759398496241,
+      "vocabulary_diversity": 0.6129032258064516,
+      "formal_tone": 0.037037037037037035,
+      "casual_tone": 0.07407407407407407,
+      "professional_tone": 0.1111111111111111
+    },
+    "common_phrases": 50,
+    "tone_markers": 14
+  },
+  "performance_metrics": [
+    {
+      "avg_score": 0.76,
+      "min_score": 0.6,
+      "max_score": 0.9,
+      "std_score": 0.10198039027185572,
+      "overall_score": 0.76,
+      "tone_score": 0.9400000000000001,
+      "structure_score": 0.7,
+      "total_cost": 0.17634000000000002
+    },
+    {
+      "avg_score": 0.6799999999999999,
+      "min_score": 0.6,
+      "max_score": 0.7,
+      "std_score": 0.039999999999999994,
+      "overall_score": 0.6799999999999999,
+      "tone_score": 0.8800000000000001,
+      "structure_score": 0.7,
+      "total_cost": 0.18063
+    },
+    {
+      "avg_score": 0.76,
+      "min_score": 0.7,
+      "max_score": 0.8,
+      "std_score": 0.048989794855663606,
+      "overall_score": 0.76,
+      "tone_score": 0.9400000000000001,
+      "structure_score": 0.7,
+      "total_cost": 0.17733
+    },
+    {
+      "avg_score": 0.7799999999999999,
+      "min_score": 0.7,
+      "max_score": 0.8,
+      "std_score": 0.040000000000000036,
+      "overall_score": 0.7799999999999999,
+      "tone_score": 1.0,
+      "structure_score": 0.7,
+      "total_cost": 0.18045000000000003
+    },
+    {
+      "avg_score": 0.74,
+      "min_score": 0.6,
+      "max_score": 0.8,
+      "std_score": 0.08000000000000003,
+      "overall_score": 0.74,
+      "tone_score": 0.9400000000000001,
+      "structure_score": 0.7,
+      "total_cost": 0.1743
+    }
+  ],
+  "final_evaluation": {
+    "responses": [
+      {
+        "prompt": "Write a friendly follow-up email about a missed meeting.",
+        "response": "Subject: Re: Follow-Up on Missed Meeting\n\nDear [Recipient's Name],\n\nI hope this message finds you well. I wanted to follow up regarding our missed meeting last week. As we understand how busy schedule"
+      },
+      {
+        "prompt": "Write a professional email requesting a meeting.",
+        "response": "Subject: Request for a Meeting to Discuss Future Collaborations\n\nDear [Recipient's Name],\n\nI hope this message finds you well. As we navigate the ever-evolving landscape of artificial intelligence, I "
+      },
+      {
+        "prompt": "Write a casual email to a colleague about a project update.",
+        "response": "Dear [Colleague's Name],\n\nI hope this message finds you well. I am writing to provide you with an update on our current project. As we progress further, it is becoming increasingly evident that artifi"
+      },
+      {
+        "prompt": "Write a formal email to a client about a deadline extension.",
+        "response": "Subject: Deadline Extension Request for Project Completion\n\nDear [Client's Name],\n\nI trust this message finds you well. We are writing to request an extension for the upcoming deadline regarding the c"
+      },
+      {
+        "prompt": "Write a thank you email after a job interview.",
+        "response": "Dear Hiring Committee,\n\nI wish to extend my sincerest gratitude for the opportunity to interview for the [specific position] within your esteemed organization. I am deeply appreciative of the time and"
+      }
+    ],
+    "feedback": [
+      {
+        "style_score": 0.7,
+        "good_aspects": [
+          "- The opening greeting is polite and sets a professional tone.",
+          "- The intention to follow up is clearly stated",
+          "which is consistent with the purpose of a follow-up email."
+        ],
+        "suggestions": [
+          "- Complete the email with a closing statement and a signature to match the full structure of the email samples.",
+          "- Ensure the email is complete by addressing any actions or next steps",
+          "similar to the detailed follow-up in the samples.",
+          "- Consider adding a question or prompt to encourage a response",
+          "as seen in the email samples."
+        ],
+        "tone_analysis": {
+          "analysis": "Professional - The tone is appropriately professional, similar to the style in the email samples. It maintains a polite and courteous approach, which is consistent with the formal tone expected in a follow-up email."
+        },
+        "structure_analysis": {
+          "analysis": "The structure partially matches the style. The opening is appropriate, but the response is incomplete, lacking a closing statement and signature. The sentence length is concise, which aligns with the email samples, but the paragraph structure is not fully developed."
+        },
+        "prompt": "Write a friendly follow-up email about a missed meeting.",
+        "local_response": "Subject: Re: Follow-Up on Missed Meeting\n\nDear [Recipient's Name],\n\nI hope this message finds you well. I wanted to follow up regarding our missed meeting last week. As we understand how busy schedule",
+        "openai_cost": 0.03453
+      },
+      {
+        "style_score": 0.7,
+        "good_aspects": [
+          "- The subject line is clear and relevant",
+          "indicating the purpose of the email.",
+          "- The opening line is polite and establishes a professional tone.",
+          "- The topic of artificial intelligence is relevant and ties back to the sample content."
+        ],
+        "suggestions": [
+          "- Complete the email with a full body and closing",
+          "ensuring it includes all necessary elements such as a clear request",
+          "any specific details or questions",
+          "and a polite closing.",
+          "- Ensure consistency in addressing the recipient by including their name and a proper sign-off.",
+          "- Expand on the purpose of the meeting and any specific topics to be discussed",
+          "similar to the detailed approach in the sample emails."
+        ],
+        "tone_analysis": {
+          "analysis": "Professional - The tone is appropriately formal and aligns well with the professional nature of the email samples provided. It maintains a respectful and courteous approach, which is suitable for a business communication setting."
+        },
+        "structure_analysis": {
+          "analysis": "The structure of the student response mirrors the email samples to some extent, with a clear subject line and a polite opening. However, it lacks a complete body and closing, which are essential components of the email structure demonstrated in the samples. The sentence length is appropriate, but the response is incomplete, which affects the overall structure."
+        },
+        "prompt": "Write a professional email requesting a meeting.",
+        "local_response": "Subject: Request for a Meeting to Discuss Future Collaborations\n\nDear [Recipient's Name],\n\nI hope this message finds you well. As we navigate the ever-evolving landscape of artificial intelligence, I ",
+        "openai_cost": 0.03666
+      },
+      {
+        "style_score": 0.6,
+        "good_aspects": [
+          "- The polite opening sets a positive tone.",
+          "- The intention to provide a project update is clear."
+        ],
+        "suggestions": [
+          "- Use a more casual greeting",
+          "such as \"Hi [Colleague's Name]",
+          "\" to match the casual tone of the prompt.",
+          "- Shorten sentences and use a more direct style to convey information efficiently.",
+          "- Complete the response with specific updates or next steps to provide clarity.",
+          "- Consider using a friendly closing",
+          "such as \"Cheers\" or \"Best",
+          "\" to maintain a casual tone."
+        ],
+        "tone_analysis": {
+          "analysis": "Semi-formal - The tone of the student response is somewhat formal, which aligns more closely with the email1.txt sample. However, the prompt requests a casual email, similar to email2.txt. The use of \"Dear [Colleague's Name]\" and \"I hope this message finds you well\" leans towards a more formal tone than required."
+        },
+        "structure_analysis": {
+          "analysis": "The structure of the student response begins with a formal greeting and a polite opening, which is consistent with the email1.txt sample. However, for a casual email, a shorter greeting and a more direct approach, as seen in email2.txt, would be more appropriate. The sentence length is relatively long, and the response is incomplete, lacking a clear conclusion or actionable items."
+        },
+        "prompt": "Write a casual email to a colleague about a project update.",
+        "local_response": "Dear [Colleague's Name],\n\nI hope this message finds you well. I am writing to provide you with an update on our current project. As we progress further, it is becoming increasingly evident that artifi",
+        "openai_cost": 0.03807
+      },
+      {
+        "style_score": 0.8,
+        "good_aspects": [
+          "- The formal tone is well-maintained.",
+          "- The use of a subject line and greeting is appropriate.",
+          "- The opening sentence effectively sets the context for the email."
+        ],
+        "suggestions": [
+          "- Complete the email with a closing paragraph and signature to fully match the structure of the sample emails.",
+          "- Ensure the email includes all necessary details",
+          "such as the reason for the deadline extension and any proposed new deadlines.",
+          "- Consider adding a sentence that reassures the client of your commitment to the project",
+          "similar to the reassurance found in the sample emails."
+        ],
+        "tone_analysis": {
+          "analysis": "Formal - The tone of the student's response is appropriately formal, aligning well with the tone used in the provided email samples. It maintains a professional demeanor, which is suitable for communication with a client."
+        },
+        "structure_analysis": {
+          "analysis": "The structure of the student's response is consistent with the formal email style. The use of a subject line, greeting, and opening sentence that sets the context is appropriate. However, the response is incomplete, and the full structure, including a closing and signature, is not visible. The sentence length and paragraph structure are concise and clear, which is consistent with the formal email samples."
+        },
+        "prompt": "Write a formal email to a client about a deadline extension.",
+        "local_response": "Subject: Deadline Extension Request for Project Completion\n\nDear [Client's Name],\n\nI trust this message finds you well. We are writing to request an extension for the upcoming deadline regarding the c",
+        "openai_cost": 0.03636
+      },
+      {
+        "style_score": 0.8,
+        "good_aspects": [
+          "- The formal tone is well-suited for a thank you email to a hiring committee.",
+          "- The expression of gratitude is clear and respectful.",
+          "- The use of formal language aligns with professional correspondence."
+        ],
+        "suggestions": [
+          "- Complete the email to include a closing statement",
+          "such as expressing enthusiasm for the position or mentioning a follow-up.",
+          "- Ensure the email includes a proper closing",
+          "such as \"Best regards\" or \"Sincerely",
+          "\" followed by the sender's name.",
+          "- Personalize the email by specifying the position discussed and any specific points from the interview that were particularly engaging or relevant."
+        ],
+        "tone_analysis": {
+          "analysis": "Formal - The tone of the student's response is formal, which is consistent with the tone observed in the email from \"email1.txt.\" The use of phrases such as \"sincerest gratitude\" and \"esteemed organization\" aligns well with the professional and respectful tone expected in a thank you email following a job interview."
+        },
+        "structure_analysis": {
+          "analysis": "The sentence length and structure are appropriate for a formal email, similar to \"email1.txt.\" The response begins with a polite greeting and expresses gratitude, which is a suitable structure for a thank you email. However, the response is incomplete, which affects the overall structure."
+        },
+        "prompt": "Write a thank you email after a job interview.",
+        "local_response": "Dear Hiring Committee,\n\nI wish to extend my sincerest gratitude for the opportunity to interview for the [specific position] within your esteemed organization. I am deeply appreciative of the time and",
+        "openai_cost": 0.037110000000000004
+      }
+    ],
+    "performance": {
+      "avg_score": 0.72,
+      "min_score": 0.6,
+      "max_score": 0.8,
+      "std_score": 0.07483314773547886,
+      "overall_score": 0.72,
+      "tone_score": 0.8800000000000001,
+      "structure_score": 0.7,
+      "total_cost": 0.18273
+    }
+  },
+  "training_history": [
+    {
+      "timestamp": "2025-07-08T11:01:32.573737",
+      "feedback_count": 5,
+      "avg_score": 0.76,
+      "tone_improvements": 5,
+      "structure_improvements": 5
+    },
+    {
+      "timestamp": "2025-07-08T11:02:22.378514",
+      "feedback_count": 5,
+      "avg_score": 0.6799999999999999,
+      "tone_improvements": 5,
+      "structure_improvements": 5
+    },
+    {
+      "timestamp": "2025-07-08T11:03:12.178920",
+      "feedback_count": 5,
+      "avg_score": 0.76,
+      "tone_improvements": 5,
+      "structure_improvements": 5
+    },
+    {
+      "timestamp": "2025-07-08T11:04:04.087659",
+      "feedback_count": 5,
+      "avg_score": 0.7799999999999999,
+      "tone_improvements": 5,
+      "structure_improvements": 5
+    },
+    {
+      "timestamp": "2025-07-08T11:05:04.381582",
+      "feedback_count": 5,
+      "avg_score": 0.74,
+      "tone_improvements": 5,
+      "structure_improvements": 5
+    }
+  ],
+  "backend_used": "hf-distilgpt2"
+}

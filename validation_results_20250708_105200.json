@@ -1,0 +1,38 @@
+{
+  "results": {
+    "rigid": {
+      "style_guide": "Writing style analysis:\n- Average sentence length: 14.3 words\n- Average word length: 5.1 characters\n- Vocabulary diversity: 0.768\n- Uses contractions\n- Includes numbers/data\n- Uses quotes/dialogue",
+      "output": "Subject: Project Update and Next Steps\n\nHi team,\n\nI hope you're all doing well. I'm writing to provide an update on the project status and outline our next steps.\n\nAs of today, we've completed 75% of the initial phase, which puts us slightly ahead of schedule. The team has done an excellent job, and I appreciate everyone's hard work. Our goal is to finalize this phase by November 15th, and I believe we're on track to achieve that.\n\nLooking ahead, the next phase will involve integrating the feedback from our recent client review. I've attached the feedback document for your reference. Let's aim to address these points by the end of this month.\n\nPlease let me know if you have any questions or need further clarification on the feedback. I'm available for a meeting anytime this week if you feel a discussion would be helpful.\n\nThanks again for your dedication and commitment to excellence.\n\nBest,\nEmily",
+      "tokens": 941,
+      "cost": 0.029670000000000002
+    },
+    "ai": {
+      "style_guide": "**Style Guide for Analyzing Writing Samples**\n\n1. **Tone and Voice:**\n   - **Overall Tone:** The tone varies across samples: the blog post maintains an informative and slightly formal tone, while the emails range from formal (email1) to casual (email2).\n   - **Voice Characteristics:** \n     - Blog post: Authoritative and informative, with a focus on future implications.\n     - Email1: Professional and courteous, with a focus on clarity and follow-up.\n     - Email2: Friendly and approachable, with an emphasis on collaboration.\n   - **Emotional Undertones:** \n     - Blog post: Optimistic about technological advancements.\n     - Email1: Reassuring and attentive.\n     - Email2: Enthusiastic and cooperative.\n\n2. **Writing Patterns:**\n   - **Sentence Structure Preferences:** \n     - Blog post: Complex sentences with multiple clauses to convey detailed information.\n     - Emails: Simple to moderately complex sentences for clarity and directness.\n   - **Paragraph Organization:** \n     - Blog post: Begins with a broad introduction, followed by specific examples, and concludes with a call to action.\n     - Emails: Start with a greeting, followed by the main message, and end with a closing statement.\n   - **Transitional Phrases and Connectors:** \n     - Blog post: Uses transitions like \"as we move forward,\" \"however,\" and \"the key is.\"\n     - Emails: Employs phrases such as \"as we discussed,\" \"please let me know,\" and \"just to make sure.\"\n   - **Repetition Patterns:** \n     - Blog post: Repeats key themes like AI's impact and ethical considerations.\n     - Emails: Reiterates main points for clarity and confirmation.\n\n3. **Language Choices:**\n   - **Vocabulary Level and Complexity:** \n     - Blog post: Uses technical and industry-specific terms (e.g., \"machine learning algorithms\").\n     - Emails: Uses straightforward language with occasional technical terms.\n   - **Technical vs. Conversational Language:** \n     - Blog post: More technical with a focus on industry advancements.\n     - Emails: Conversational, with a focus on practical details.\n   - **Industry-Specific Terminology:** \n     - Blog post: Terms related to AI and technology.\n     - Emails: Project management and development terms.\n   - **Cultural References or Idioms:** \n     - Minimal use across samples; focus is on clear communication.\n\n4. **Structural Elements:**\n   - **Opening and Closing Patterns:** \n     - Blog post: Opens with a broad statement, closes with a call to action.\n     - Emails: Begin with a greeting, end with a courteous closing.\n   - **Use of Lists, Bullet Points, or Formatting:** \n     - Not prominently used; focus is on paragraph structure.\n   - **Citation or Reference Styles:** \n     - Not applicable; information is presented without formal citations.\n   - **Length Preferences:** \n     - Blog post: Medium length with detailed exploration of topics.\n     - Emails: Concise, focusing on essential information.\n\n5. **Unique Characteristics:**\n   - **Distinctive Phrases or Expressions:** \n     - Blog post: \"The key is finding the right balance.\"\n     - Emails: \"Please let me know if you have any questions.\"\n   - **Personal Writing Quirks:** \n     - Blog post: Uses rhetorical questions to engage readers.\n     - Emails: Uses direct questions to ensure clarity.\n   - **Consistent Formatting Choices:** \n     - Blog post: Uses subheadings for organization.\n     - Emails: Consistent use of greetings and sign-offs.\n\nBy adhering to these guidelines, writers can replicate the style of the provided samples, ensuring consistency in tone, structure, and language.",
+      "output": "Subject: Follow-Up on Upcoming Project Milestones\n\nDear Ms. Thompson,\n\nI hope this message finds you well. I am writing to follow up on our previous conversation regarding the upcoming milestones for our current project.\n\nAs we discussed during our meeting earlier this month, the next phase is set to commence on November 10th, with an expected completion by February 28th. I wanted to ensure that all necessary resources and personnel are in place and that we are aligned on the project objectives.\n\nPlease let me know if you have any questions or require additional information before we proceed. I am available to discuss further details at your convenience and am happy to schedule a call if needed.\n\nThank you for your continued support and collaboration.\n\nBest regards,\n\nJohn Smith  \nSenior Project Coordinator",
+      "tokens": 1631,
+      "cost": 0.04956,
+      "analysis_cost": 0.06917999999999999
+    },
+    "direct": {
+      "style_guide": "Direct sample comparison",
+      "output": "Subject: Project Update and Next Steps\n\nHi team,\n\nI wanted to provide you with a quick update on the progress of our current project and outline the next steps as we move forward.\n\nAs of today, we've completed the initial research phase and are set to enter the development stage on April 5th. Our target completion date remains August 15th. The feedback from our last review meeting has been incredibly valuable, and adjustments have been made accordingly.\n\nPlease ensure that all team members are aware of their respective responsibilities and that any outstanding issues are addressed promptly. If there are any changes to resource availability or if further clarification is needed, feel free to reach out.\n\nLooking forward to our continued collaboration!\n\nBest,  \nJessica",
+      "tokens": 875,
+      "cost": 0.026580000000000003
+    }
+  },
+  "similarity_scores": {
+    "rigid": 0.3882783882783883,
+    "ai": 0.4468864468864469,
+    "direct": 0.32234432234432236
+  },
+  "recommendation": {
+    "best_method": "ai",
+    "best_score": 0.4468864468864469,
+    "total_costs": {
+      "rigid": 0.029670000000000002,
+      "ai": 0.11873999999999998,
+      "direct": 0.026580000000000003
+    },
+    "recommendation": "AI-generated style analysis performed best (similarity: 0.45) but costs $0.1187 total."
+  }
+}

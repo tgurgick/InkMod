@@ -29,6 +29,16 @@ class Settings:
         """Validate that required settings are configured."""
         if not cls.OPENAI_API_KEY:
             raise ValueError("OPENAI_API_KEY environment variable is required")
+        
+        # Security: Validate API key format
+        if cls.OPENAI_API_KEY and not cls.OPENAI_API_KEY.startswith('sk-'):
+            raise ValueError("Invalid OpenAI API key format")
+        
+        # Security: Validate model name
+        allowed_models = ['gpt-4o', 'gpt-4o-mini', 'gpt-3.5-turbo', 'gpt-4']
+        if cls.OPENAI_MODEL not in allowed_models:
+            raise ValueError(f"Unsupported model: {cls.OPENAI_MODEL}")
+        
         return True
 
 # Global settings instance
