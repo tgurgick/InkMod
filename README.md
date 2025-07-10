@@ -251,6 +251,25 @@ Reinforcement Learning Training Results
    Potential Savings: $0.1262
 ```
 
+## Local LLM Backends: Cost, Privacy, and Output Quality
+
+InkMod supports multiple generation modes, each with different tradeoffs for cost, privacy, and output quality. For best results, use a lightweight local LLM backend (such as Llama.cpp, GPT4All, or HuggingFace models) together with your learned style model.
+
+| Mode                | Cost   | Privacy | Output Quality         | Notes                                 |
+|---------------------|--------|---------|------------------------|---------------------------------------|
+| Template-based      | $0     | Local   | Basic, style-matched   | No LLM, just patterns                 |
+| Local LLM backend   | $0     | Local   | High, context-aware    | Best local results, needs LLM         |
+| OpenAI API          | $$$    | Cloud   | High, context-aware    | Best quality, but costs money         |
+
+### Key Points
+- **Local LLM backend** (Llama.cpp, GPT4All, HuggingFace, etc.) + your learned model = **best results, zero cost, and full privacy**.
+- All processing is local—no data leaves your machine.
+- You can generate any type of text, and the LLM will adapt to your prompt, using your style as a guide.
+- Template-based mode is always available, but is less flexible and creative.
+- OpenAI API mode provides the highest quality, but incurs cost and requires an API key.
+
+See the [docs/LOCAL_MODEL_LEARNING.md](docs/LOCAL_MODEL_LEARNING.md) and [docs/SCORING_AND_RL_GUIDE.md](docs/SCORING_AND_RL_GUIDE.md) for more details on model selection and backend setup.
+
 ## Writing Samples
 
 Create a folder with text files containing writing samples. The tool will analyze these files to understand the writing style.
