@@ -1,8 +1,6 @@
 # InkMod - Writing Style Mirror CLI Tool
 
-**🚧 Work in Progress - MVP Version** 
-
-InkMod is an open-source CLI tool that analyzes a user's writing style from provided examples and generates responses that match that style using OpenAI's API. This is currently in MVP (Minimum Viable Product) phase with core functionality implemented.
+InkMod is an open-source CLI tool that analyzes a user's writing style from provided examples and generates responses that match that style using OpenAI's API. Built with imitation learning and reinforcement training for optimal style matching.
 
 ## About InkMod: Imitation Learning for Writing Style
 

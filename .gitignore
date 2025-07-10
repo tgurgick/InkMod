@@ -130,4 +130,13 @@ dmypy.json
 
 # InkMod specific
 feedback.json
-*.log 
+*.log
+
+# Training results and model files
+*_training_*.json
+*_reinforcement_training_*.json
+*_enhanced_reinforcement_training_*.json
+*_hybrid_reinforcement_training_*.json
+validation_results_*.json
+enhanced_style_model.pkl
+local_style_model.pkl 
