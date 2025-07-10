@@ -40,10 +40,14 @@ InkMod uses a comprehensive scoring system to evaluate style matching quality:
 - **Style Mirroring**: Generate responses that match the analyzed writing style
 - **Style Validation**: Compare different analysis methods and validate their effectiveness
 - **Reinforcement Learning**: Train a local model using OpenAI as teacher
+- **Continuous Learning**: Model remembers and improves with each session
+- **Multi-Backend LLM Support**: Use Llama.cpp, GPT4All, or HuggingFace for local generation
+- **Backend Management**: List, inspect, and test local LLM backends
 - **Interactive Mode**: Real-time style mirroring with immediate feedback
 - **Batch Processing**: Process multiple inputs at once
 - **Feedback System**: Capture user edits to improve future generations
 - **AI-Powered Analysis**: Use OpenAI to generate nuanced style guides
+- **Model Inspection**: Explore and export learned models with the `explore` command
 
 ## Installation
 
@@ -105,11 +109,33 @@ This creates a local model that learns your writing style and can generate respo
 
 **Cost**: ~$0.18 per iteration. Most use cases achieve good results with 3-5 iterations.
 
-### Using a Different Model
+### Enhanced Training & Continuous Learning
 
-Override the model at runtime:
+Train with advanced pattern extraction, multi-backend LLMs, and continuous learning:
 ```bash
-inkmod generate --style-folder ./writing-samples --input "Write a professional email response" --model gpt-3.5-turbo
+inkmod train-enhanced --style-folder ./writing-samples --test-prompts test_prompts.txt --backend hf-distilgpt2 --iterations 5 --incremental
+```
+- Use `--incremental` (default) to build on previous learning
+- Use `--fresh` to start a new model from scratch
+
+### Model Inspection & Exploration
+
+Explore and analyze your learned model:
+```bash
+inkmod explore --model-path enhanced_style_model.pkl --detailed
+```
+- Use `--detailed` for a full breakdown (vocabulary, patterns, history, scores)
+- Use `--export-json model_info.json` to export model details for further analysis
+
+📖 **See [docs/MODEL_FILE_GUIDE.md](docs/MODEL_FILE_GUIDE.md) for a full explanation of the model file structure and how to read it.**
+
+### Backend Management
+
+List, inspect, and test local LLM backends:
+```bash
+inkmod backends --list
+inkmod backends --info llama-7b
+inkmod backends --test gpt4all-j
 ```
 
 ### Interactive Mode
@@ -131,6 +157,13 @@ inkmod batch --style-folder ./writing-samples --input-file inputs.txt --output-f
 Generate and edit responses while capturing feedback:
 ```bash
 inkmod generate --style-folder ./writing-samples --input "Write a blog post" --edit-mode
+```
+
+### Check Learning Progress
+
+See your model's learning journey, best scores, and convergence:
+```bash
+inkmod learning-progress
 ```
 
 ## Sample Output
@@ -239,10 +272,6 @@ You can configure various parameters in your `.env` file or via CLI flags:
 # Set model parameters in .env
 OPENAI_MODEL=gpt-4o
 OPENAI_MAX_TOKENS=1000
-OPENAI_TEMPERATURE=0.7
-
-# Or override at runtime
-inkmod generate --style-folder ./samples --input "Write something" --temperature 0.7 --max-tokens 500 --model gpt-4o
 ```
 
 ## Development

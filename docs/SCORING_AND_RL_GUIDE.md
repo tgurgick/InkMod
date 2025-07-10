@@ -1,5 +1,10 @@
 # 📊 Scoring System & Reinforcement Learning Guide
 
+> **ℹ️ Tip:** You can inspect your model's scores, learning progress, and convergence at any time with:
+> ```bash
+> inkmod explore --detailed
+> ```
+
 ## 🎯 Understanding the Scores
 
 ### **Score Ranges & Interpretation**

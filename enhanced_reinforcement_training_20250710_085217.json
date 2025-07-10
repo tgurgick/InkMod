@@ -1,0 +1,386 @@
+{
+  "initial_stats": {
+    "vocabulary_size": 474,
+    "sentence_patterns": 54,
+    "paragraph_patterns": 36,
+    "style_characteristics": {
+      "avg_sentence_length": 15.407407407407407,
+      "avg_word_length": 6.776371308016878,
+      "vocabulary_diversity": 0.24559585492227978,
+      "formal_tone": 0.037037037037037035,
+      "casual_tone": 0.07407407407407407,
+      "professional_tone": 0.1111111111111111
+    },
+    "common_phrases": 50,
+    "tone_markers": 14,
+    "training_session": {
+      "timestamp": "2025-07-10T08:49:14.513238",
+      "samples_count": 3,
+      "total_characters": 2655,
+      "incremental": true,
+      "previous_vocabulary_size": 474,
+      "previous_samples_count": 3
+    },
+    "learning_progress": {
+      "total_training_sessions": 4,
+      "total_samples_processed": 12,
+      "best_style_score": 0.0,
+      "best_tone_score": 1.0,
+      "best_structure_score": 0.7,
+      "last_improvement": null,
+      "convergence_indicators": [
+        {
+          "timestamp": "2025-07-10T08:22:05.943380",
+          "variance": 8.888888888888807e-05,
+          "converged": true
+        },
+        {
+          "timestamp": "2025-07-10T08:22:45.710125",
+          "variance": 0.00026666666666666717,
+          "converged": true
+        },
+        {
+          "timestamp": "2025-07-10T08:24:58.354032",
+          "variance": 0.001688888888888892,
+          "converged": true
+        },
+        {
+          "timestamp": "2025-07-10T08:25:38.199359",
+          "variance": 0.0016888888888888917,
+          "converged": true
+        },
+        {
+          "timestamp": "2025-07-10T08:49:58.341247",
+          "variance": 0.001688888888888892,
+          "converged": true
+        },
+        {
+          "timestamp": "2025-07-10T08:50:59.277355",
+          "variance": 0.0008000000000000016,
+          "converged": true
+        }
+      ]
+    }
+  },
+  "performance_metrics": [
+    {
+      "avg_score": 0.7799999999999999,
+      "min_score": 0.7,
+      "max_score": 0.8,
+      "std_score": 0.040000000000000036,
+      "overall_score": 0.7799999999999999,
+      "tone_score": 1.0,
+      "structure_score": 0.7,
+      "total_cost": 0.18042000000000002,
+      "timestamp": "2025-07-10T08:13:25.248225"
+    },
+    {
+      "avg_score": 0.7799999999999999,
+      "min_score": 0.7,
+      "max_score": 0.8,
+      "std_score": 0.040000000000000036,
+      "overall_score": 0.7799999999999999,
+      "tone_score": 0.9400000000000001,
+      "structure_score": 0.7,
+      "total_cost": 0.17559000000000002,
+      "timestamp": "2025-07-10T08:21:21.824219"
+    },
+    {
+      "avg_score": 0.76,
+      "min_score": 0.6,
+      "max_score": 0.8,
+      "std_score": 0.08000000000000003,
+      "overall_score": 0.76,
+      "tone_score": 0.9400000000000001,
+      "structure_score": 0.7,
+      "total_cost": 0.17961,
+      "timestamp": "2025-07-10T08:22:05.943296"
+    },
+    {
+      "avg_score": 0.8,
+      "min_score": 0.7,
+      "max_score": 0.9,
+      "std_score": 0.0632455532033676,
+      "overall_score": 0.8,
+      "tone_score": 0.8800000000000001,
+      "structure_score": 0.7,
+      "total_cost": 0.17793000000000003,
+      "timestamp": "2025-07-10T08:22:45.709862"
+    },
+    {
+      "avg_score": 0.7,
+      "min_score": 0.3,
+      "max_score": 0.8,
+      "std_score": 0.2,
+      "overall_score": 0.7,
+      "tone_score": 0.9,
+      "structure_score": 0.7,
+      "total_cost": 0.17547000000000001,
+      "timestamp": "2025-07-10T08:24:58.353931"
+    },
+    {
+      "avg_score": 0.74,
+      "min_score": 0.6,
+      "max_score": 0.8,
+      "std_score": 0.08000000000000003,
+      "overall_score": 0.74,
+      "tone_score": 0.9400000000000001,
+      "structure_score": 0.7,
+      "total_cost": 0.17775000000000002,
+      "timestamp": "2025-07-10T08:25:38.199295"
+    },
+    {
+      "avg_score": 0.8,
+      "min_score": 0.7,
+      "max_score": 0.9,
+      "std_score": 0.0632455532033676,
+      "overall_score": 0.8,
+      "tone_score": 1.0,
+      "structure_score": 0.7,
+      "total_cost": 0.17229000000000003,
+      "timestamp": "2025-07-10T08:49:58.341143"
+    },
+    {
+      "avg_score": 0.74,
+      "min_score": 0.6,
+      "max_score": 0.8,
+      "std_score": 0.08000000000000003,
+      "overall_score": 0.74,
+      "tone_score": 0.9400000000000001,
+      "structure_score": 0.76,
+      "total_cost": 0.17495999999999998,
+      "timestamp": "2025-07-10T08:50:59.277273"
+    }
+  ],
+  "final_evaluation": {
+    "responses": [
+      {
+        "prompt": "Write a friendly follow-up email about a missed meeting.",
+        "response": "Subject: Friendly Follow-Up Regarding Missed Meeting\n\nDear [Recipient's Name],\n\nI hope this email finds you well. I am writing to follow up on the missed meeting we had scheduled last week. It is impe"
+      },
+      {
+        "prompt": "Write a professional email requesting a meeting.",
+        "response": "Subject: Request for Meeting\n\nDear [Recipient's Name],\n\nI hope this email finds you well. I am writing to formally request a meeting with you to discuss [specific topic/issue]. Ensuring the efficiency"
+      },
+      {
+        "prompt": "Write a casual email to a colleague about a project update.",
+        "response": "Dear Colleague,\n\nI trust this email finds you well. I am writing to provide you with an update on our ongoing project. Please be informed that the latest developments have been quite promising. We hav"
+      },
+      {
+        "prompt": "Write a formal email to a client about a deadline extension.",
+        "response": "Subject: Deadline Extension Request for Project Completion\n\nDear [Client's Name],\n\nI trust this email finds you well. I am writing to inform you about the need for a deadline extension for the complet"
+      },
+      {
+        "prompt": "Write a thank you email after a job interview.",
+        "response": "Subject: Thank You for the Job Interview Opportunity\n\nDear [Interviewer's Name],\n\nI am writing to extend my deepest gratitude for the opportunity to interview for the [Position Title] at [Company Name"
+      }
+    ],
+    "feedback": [
+      {
+        "style_score": 0.8,
+        "good_aspects": [
+          "- The greeting \"I hope this email finds you well\" is consistent with the tone of the email samples.",
+          "- The purpose of the email is clearly stated",
+          "which is important for clarity.",
+          "- The use of a friendly and professional tone is well-executed."
+        ],
+        "suggestions": [
+          "- Complete the email to ensure it follows through with a closing and any necessary next steps or questions.",
+          "- Consider adding a sentence to express understanding or offer to reschedule",
+          "which would enhance the friendly tone.",
+          "- Ensure the email ends with a polite closing and signature",
+          "similar to the samples provided."
+        ],
+        "tone_analysis": {
+          "analysis": "Professional - The tone is appropriately professional and friendly, aligning well with the style of the email samples provided. It maintains a courteous and considerate approach, which is suitable for a follow-up email."
+        },
+        "structure_analysis": {
+          "analysis": "The structure is mostly consistent with the email samples. It begins with a greeting, follows with the purpose of the email, and includes a polite closing. However, the email is incomplete, which affects the overall structure."
+        },
+        "prompt": "Write a friendly follow-up email about a missed meeting.",
+        "local_response": "Subject: Friendly Follow-Up Regarding Missed Meeting\n\nDear [Recipient's Name],\n\nI hope this email finds you well. I am writing to follow up on the missed meeting we had scheduled last week. It is impe",
+        "openai_cost": 0.03561
+      },
+      {
+        "style_score": 0.8,
+        "good_aspects": [
+          "- The opening greeting is polite and sets a professional tone.",
+          "- The purpose of the email is clearly stated.",
+          "- The use of formal language is consistent with the style."
+        ],
+        "suggestions": [
+          "- Complete the email with a closing statement and signature",
+          "similar to the sample emails.",
+          "- Include specific details about the meeting",
+          "such as proposed dates and times",
+          "to provide clarity and facilitate scheduling.",
+          "- Ensure the email is fully developed to match the completeness of the samples",
+          "including a polite closing and contact information."
+        ],
+        "tone_analysis": {
+          "analysis": "Professional - The tone is appropriately formal and consistent with the style of professional emails, similar to the samples provided. The email maintains a respectful and courteous approach, which is suitable for a business context."
+        },
+        "structure_analysis": {
+          "analysis": "The structure generally aligns with the style of the sample emails. The email begins with a polite greeting, followed by the purpose of the message. However, it is incomplete, lacking a closing and additional details that would typically be present in a professional email."
+        },
+        "prompt": "Write a professional email requesting a meeting.",
+        "local_response": "Subject: Request for Meeting\n\nDear [Recipient's Name],\n\nI hope this email finds you well. I am writing to formally request a meeting with you to discuss [specific topic/issue]. Ensuring the efficiency",
+        "openai_cost": 0.034530000000000005
+      },
+      {
+        "style_score": 0.6,
+        "good_aspects": [
+          "- The use of a greeting and closing is consistent with the sample emails.",
+          "- The intention to provide an update is clear."
+        ],
+        "suggestions": [
+          "- Use a more casual greeting",
+          "such as \"Hi [Name]",
+          "\" to match the tone of the sample emails.",
+          "- Be more direct and concise in the body of the email. Include specific details about the project update.",
+          "- Use a closing that reflects a casual tone",
+          "such as \"Thanks\" or \"Cheers",
+          "\" instead of a formal closing."
+        ],
+        "tone_analysis": {
+          "analysis": "Formal - The tone of the student's response is more formal than the casual tone seen in the sample emails. The use of \"Dear Colleague\" and \"I trust this email finds you well\" leans towards a more formal style, which is not consistent with the casual tone of the sample emails."
+        },
+        "structure_analysis": {
+          "analysis": "The structure of the student's response is partially aligned with the sample emails. The opening and closing are similar, but the body of the email is not as concise or direct as the samples. The student's response starts with a formal greeting and an introductory sentence, but it lacks the specific details and directness found in the sample emails."
+        },
+        "prompt": "Write a casual email to a colleague about a project update.",
+        "local_response": "Dear Colleague,\n\nI trust this email finds you well. I am writing to provide you with an update on our ongoing project. Please be informed that the latest developments have been quite promising. We hav",
+        "openai_cost": 0.036570000000000005
+      },
+      {
+        "style_score": 0.8,
+        "good_aspects": [
+          "- Formal greeting and closing",
+          "- Professional tone",
+          "- Clear subject line"
+        ],
+        "suggestions": [
+          "- Complete the email with a detailed explanation for the deadline extension.",
+          "- Propose a new deadline and express willingness to discuss any concerns.",
+          "- Ensure the email is fully written out to maintain coherence and completeness."
+        ],
+        "tone_analysis": {
+          "analysis": "Formal - The tone is appropriately formal, aligning well with the style of the provided email samples. The use of phrases like \"I trust this email finds you well\" and \"I am writing to inform you\" is consistent with a professional tone suitable for client communication."
+        },
+        "structure_analysis": {
+          "analysis": "The structure is mostly consistent with the style of the email samples. The sentence length is appropriate, and the opening sentence effectively sets the context. However, the response is incomplete, which affects the overall structure. It should include a clear explanation for the deadline extension, a proposed new deadline, and an invitation for the client to discuss further if needed."
+        },
+        "prompt": "Write a formal email to a client about a deadline extension.",
+        "local_response": "Subject: Deadline Extension Request for Project Completion\n\nDear [Client's Name],\n\nI trust this email finds you well. I am writing to inform you about the need for a deadline extension for the complet",
+        "openai_cost": 0.03408
+      },
+      {
+        "style_score": 0.8,
+        "good_aspects": [
+          "- The use of formal language is consistent with the style of the provided email samples.",
+          "- The opening sentence effectively conveys gratitude",
+          "which is the primary purpose of the email.",
+          "- The use of placeholders ([Interviewer's Name]",
+          "[Position Title]",
+          "[Company Name]) indicates an understanding of personalization",
+          "which is important in professional correspondence."
+        ],
+        "suggestions": [
+          "- Complete the email with a closing statement that reiterates interest in the position and expresses enthusiasm about the opportunity to join the company.",
+          "- Add a closing signature with the student's name to provide a professional finish.",
+          "- Ensure the email is free of incomplete sentences or missing elements to maintain professionalism and clarity."
+        ],
+        "tone_analysis": {
+          "analysis": "Formal - The tone of the student response is appropriately formal, matching the tone of the email samples provided. It conveys gratitude and professionalism, which is suitable for a thank you email after a job interview."
+        },
+        "structure_analysis": {
+          "analysis": "The structure of the email is consistent with the samples, beginning with a greeting, followed by the main message, and concluding with a closing. However, the email is incomplete, lacking a conclusion and a signature, which are essential for a complete email format."
+        },
+        "prompt": "Write a thank you email after a job interview.",
+        "local_response": "Subject: Thank You for the Job Interview Opportunity\n\nDear [Interviewer's Name],\n\nI am writing to extend my deepest gratitude for the opportunity to interview for the [Position Title] at [Company Name",
+        "openai_cost": 0.03624
+      }
+    ],
+    "performance": {
+      "avg_score": 0.76,
+      "min_score": 0.6,
+      "max_score": 0.8,
+      "std_score": 0.08000000000000003,
+      "overall_score": 0.76,
+      "tone_score": 0.9400000000000001,
+      "structure_score": 0.7,
+      "total_cost": 0.17703000000000002
+    }
+  },
+  "training_history": [
+    {
+      "timestamp": "2025-07-10T08:12:39.538875",
+      "samples_count": 3,
+      "total_characters": 2655,
+      "incremental": true,
+      "previous_vocabulary_size": 0,
+      "previous_samples_count": 0
+    },
+    {
+      "timestamp": "2025-07-10T08:20:28.257809",
+      "samples_count": 3,
+      "total_characters": 2655,
+      "incremental": true,
+      "previous_vocabulary_size": 396,
+      "previous_samples_count": 3
+    },
+    {
+      "timestamp": "2025-07-10T08:24:23.619391",
+      "samples_count": 3,
+      "total_characters": 2655,
+      "incremental": false,
+      "previous_vocabulary_size": 556,
+      "previous_samples_count": 6
+    },
+    {
+      "timestamp": "2025-07-10T08:49:14.513238",
+      "samples_count": 3,
+      "total_characters": 2655,
+      "incremental": true,
+      "previous_vocabulary_size": 474,
+      "previous_samples_count": 3
+    }
+  ],
+  "learning_summary": {
+    "total_sessions": 4,
+    "total_samples": 12,
+    "current_vocabulary_size": 562,
+    "current_samples_count": 6,
+    "best_scores": {
+      "style": 0.0,
+      "tone": 1.0,
+      "structure": 0.7
+    },
+    "last_improvement": null,
+    "convergence_status": {
+      "converged": true,
+      "confidence": "high",
+      "variance": 0.0008000000000000016
+    },
+    "performance_trend": {
+      "trend": "stable",
+      "improvement_rate": 0.0,
+      "recent_average": 0.7600000000000001,
+      "earlier_average": 0.7600000000000001
+    },
+    "training_sessions": 4,
+    "performance_metrics_count": 8
+  },
+  "backend_used": "openai",
+  "convergence_analysis": {
+    "converged": true,
+    "confidence": "high",
+    "variance": 0.0008000000000000016
+  },
+  "performance_trend": {
+    "trend": "stable",
+    "improvement_rate": 0.0,
+    "recent_average": 0.7600000000000001,
+    "earlier_average": 0.7600000000000001
+  }
+}

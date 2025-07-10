@@ -1,4 +1,4 @@
-"""Enhanced style model with lightweight LLM integration."""
+"""Enhanced style model with lightweight LLM integration and continuous learning."""
 
 import json
 import pickle
@@ -11,6 +11,7 @@ from rich.console import Console
 from rich.progress import Progress
 import requests
 import os
+from datetime import datetime
 
 from core.openai_client import OpenAIClient
 from core.llm_backends import LLMBackendManager, create_backend_manager
@@ -19,7 +20,7 @@ from utils.text_utils import combine_style_samples
 console = Console()
 
 class EnhancedStyleModel:
-    """Enhanced local model with lightweight LLM integration."""
+    """Enhanced local model with lightweight LLM integration and continuous learning."""
     
     def __init__(self, model_path: Optional[str] = None, use_local_llm: bool = True, backend_name: str = None):
         self.model_path = model_path or "enhanced_style_model.pkl"
@@ -39,6 +40,19 @@ class EnhancedStyleModel:
         self.tone_markers = {}
         self.structure_patterns = []
         
+        # Continuous learning data
+        self.training_history = []
+        self.performance_metrics = []
+        self.learning_progress = {
+            'total_training_sessions': 0,
+            'total_samples_processed': 0,
+            'best_style_score': 0.0,
+            'best_tone_score': 0.0,
+            'best_structure_score': 0.0,
+            'last_improvement': None,
+            'convergence_indicators': []
+        }
+        
         # LLM configuration
         self.llm_config = {
             'model': 'gpt-3.5-turbo',  # Lightweight API model
@@ -51,8 +65,11 @@ class EnhancedStyleModel:
         if backend_name:
             self.backend_manager.set_backend(backend_name)
         
-    def train(self, samples: Dict[str, str]) -> Dict[str, any]:
-        """Enhanced training with better pattern extraction."""
+        # Load existing model if available
+        self.load_model()
+    
+    def train(self, samples: Dict[str, str], incremental: bool = True) -> Dict[str, any]:
+        """Enhanced training with continuous learning support."""
         
         console.print("🧠 Training enhanced style model...")
         
@@ -67,7 +84,30 @@ class EnhancedStyleModel:
             if len(content) > 1000000:  # 1MB limit per sample
                 raise ValueError(f"Sample {filename} too large")
         
-        # Extract basic patterns (like before)
+        # Record training session
+        session_info = {
+            'timestamp': datetime.now().isoformat(),
+            'samples_count': len(samples),
+            'total_characters': sum(len(content) for content in samples.values()),
+            'incremental': incremental,
+            'previous_vocabulary_size': len(self.vocabulary),
+            'previous_samples_count': len(self.training_samples)
+        }
+        
+        if incremental and self.training_samples:
+            console.print("🔄 Incremental training mode - building on previous learning")
+        else:
+            console.print("🆕 Fresh training mode - starting new model")
+            # Reset for fresh training
+            self.vocabulary = Counter()
+            self.sentence_patterns = []
+            self.paragraph_patterns = []
+            self.training_samples = []
+            self.common_phrases = []
+            self.tone_markers = {}
+            self.structure_patterns = []
+        
+        # Extract patterns
         for filename, content in samples.items():
             self.training_samples.append(content)
             
@@ -105,6 +145,9 @@ class EnhancedStyleModel:
         # Create style prompt template
         self.style_prompt_template = self._create_style_prompt_template()
         
+        # Update learning progress
+        self._update_learning_progress(session_info)
+        
         # Save the model
         self.save_model()
         
@@ -119,7 +162,162 @@ class EnhancedStyleModel:
             'paragraph_patterns': len(self.paragraph_patterns),
             'style_characteristics': self.style_characteristics,
             'common_phrases': len(self.common_phrases),
-            'tone_markers': tone_markers_count
+            'tone_markers': tone_markers_count,
+            'training_session': session_info,
+            'learning_progress': self.learning_progress
+        }
+    
+    def _update_learning_progress(self, session_info: Dict[str, any]) -> None:
+        """Update continuous learning progress metrics."""
+        
+        self.learning_progress['total_training_sessions'] += 1
+        self.learning_progress['total_samples_processed'] += session_info['samples_count']
+        
+        # Store training session
+        self.training_history.append(session_info)
+        
+        # Update best scores if we have performance metrics
+        if self.performance_metrics:
+            latest_metrics = self.performance_metrics[-1]
+            if 'style_score' in latest_metrics:
+                if latest_metrics['style_score'] > self.learning_progress['best_style_score']:
+                    self.learning_progress['best_style_score'] = latest_metrics['style_score']
+                    self.learning_progress['last_improvement'] = datetime.now().isoformat()
+            
+            if 'tone_score' in latest_metrics:
+                if latest_metrics['tone_score'] > self.learning_progress['best_tone_score']:
+                    self.learning_progress['best_tone_score'] = latest_metrics['tone_score']
+            
+            if 'structure_score' in latest_metrics:
+                if latest_metrics['structure_score'] > self.learning_progress['best_structure_score']:
+                    self.learning_progress['best_structure_score'] = latest_metrics['structure_score']
+    
+    def add_performance_metric(self, metrics: Dict[str, any]) -> None:
+        """Add performance metrics from training iteration."""
+        
+        metrics['timestamp'] = datetime.now().isoformat()
+        self.performance_metrics.append(metrics)
+        
+        # Update convergence indicators
+        if len(self.performance_metrics) >= 3:
+            recent_scores = [m.get('overall_score', 0) for m in self.performance_metrics[-3:]]
+            if len(recent_scores) == 3:
+                variance = np.var(recent_scores)
+                self.learning_progress['convergence_indicators'].append({
+                    'timestamp': datetime.now().isoformat(),
+                    'variance': variance,
+                    'converged': variance < 0.01  # Low variance indicates convergence
+                })
+    
+    def get_learning_summary(self) -> Dict[str, any]:
+        """Get comprehensive learning progress summary."""
+        
+        return {
+            'total_sessions': self.learning_progress['total_training_sessions'],
+            'total_samples': self.learning_progress['total_samples_processed'],
+            'current_vocabulary_size': len(self.vocabulary),
+            'current_samples_count': len(self.training_samples),
+            'best_scores': {
+                'style': self.learning_progress['best_style_score'],
+                'tone': self.learning_progress['best_tone_score'],
+                'structure': self.learning_progress['best_structure_score']
+            },
+            'last_improvement': self.learning_progress['last_improvement'],
+            'convergence_status': self._get_convergence_status(),
+            'performance_trend': self._get_performance_trend(),
+            'training_sessions': len(self.training_history),
+            'performance_metrics_count': len(self.performance_metrics)
+        }
+    
+    def _get_convergence_status(self) -> Dict[str, any]:
+        """Analyze if the model has converged."""
+        
+        if len(self.performance_metrics) < 3:
+            return {'converged': False, 'confidence': 'low', 'reason': 'insufficient_data'}
+        
+        recent_scores = [m.get('overall_score', 0) for m in self.performance_metrics[-3:]]
+        variance = np.var(recent_scores)
+        
+        if variance < 0.01:
+            return {'converged': True, 'confidence': 'high', 'variance': variance}
+        elif variance < 0.05:
+            return {'converged': True, 'confidence': 'medium', 'variance': variance}
+        else:
+            return {'converged': False, 'confidence': 'low', 'variance': variance}
+    
+    def _get_performance_trend(self) -> Dict[str, any]:
+        """Analyze performance trend over time."""
+        
+        if len(self.performance_metrics) < 2:
+            return {'trend': 'insufficient_data', 'improvement_rate': 0.0}
+        
+        scores = [m.get('overall_score', 0) for m in self.performance_metrics]
+        
+        if len(scores) >= 2:
+            recent_avg = np.mean(scores[-3:]) if len(scores) >= 3 else scores[-1]
+            earlier_avg = np.mean(scores[:-2]) if len(scores) >= 3 else scores[0]
+            improvement_rate = (recent_avg - earlier_avg) / max(earlier_avg, 0.1)
+            
+            if improvement_rate > 0.1:
+                trend = 'improving'
+            elif improvement_rate > -0.1:
+                trend = 'stable'
+            else:
+                trend = 'declining'
+            
+            return {
+                'trend': trend,
+                'improvement_rate': improvement_rate,
+                'recent_average': recent_avg,
+                'earlier_average': earlier_avg
+            }
+        
+        return {'trend': 'insufficient_data', 'improvement_rate': 0.0}
+    
+    def should_continue_training(self, min_improvement: float = 0.05) -> Dict[str, any]:
+        """Determine if training should continue based on recent performance."""
+        
+        summary = self.get_learning_summary()
+        convergence = self._get_convergence_status()
+        trend = self._get_performance_trend()
+        
+        # Check if converged
+        if convergence['converged'] and convergence['confidence'] in ['high', 'medium']:
+            return {
+                'continue': False,
+                'reason': 'model_converged',
+                'confidence': convergence['confidence'],
+                'variance': convergence['variance']
+            }
+        
+        # Check if still improving
+        if trend['trend'] == 'improving' and trend['improvement_rate'] > min_improvement:
+            return {
+                'continue': True,
+                'reason': 'still_improving',
+                'improvement_rate': trend['improvement_rate']
+            }
+        
+        # Check if stable but not converged
+        if trend['trend'] == 'stable':
+            return {
+                'continue': True,
+                'reason': 'stable_but_not_converged',
+                'suggestion': 'try_more_iterations'
+            }
+        
+        # Check if declining
+        if trend['trend'] == 'declining':
+            return {
+                'continue': False,
+                'reason': 'performance_declining',
+                'suggestion': 'review_training_data'
+            }
+        
+        return {
+            'continue': True,
+            'reason': 'insufficient_data',
+            'suggestion': 'continue_training'
         }
     
     def _extract_enhanced_patterns(self, samples: Dict[str, str]) -> None:
@@ -520,7 +718,10 @@ Write a response to: {{prompt}}"""
             'common_phrases': self.common_phrases,
             'tone_markers': self.tone_markers,
             'structure_patterns': self.structure_patterns,
-            'llm_config': self.llm_config
+            'llm_config': self.llm_config,
+            'training_history': self.training_history,
+            'performance_metrics': self.performance_metrics,
+            'learning_progress': self.learning_progress
         }
         
         with open(self.model_path, 'wb') as f:
@@ -558,6 +759,9 @@ Write a response to: {{prompt}}"""
             self.tone_markers = model_data.get('tone_markers', {})
             self.structure_patterns = model_data.get('structure_patterns', [])
             self.llm_config = model_data.get('llm_config', self.llm_config)
+            self.training_history = model_data.get('training_history', [])
+            self.performance_metrics = model_data.get('performance_metrics', [])
+            self.learning_progress = model_data.get('learning_progress', self.learning_progress)
             
             console.print(f"📂 Enhanced model loaded from {self.model_path}")
             return True
@@ -579,5 +783,7 @@ Write a response to: {{prompt}}"""
             'common_phrases': len(self.common_phrases),
             'tone_markers': {tone: len(markers) for tone, markers in self.tone_markers.items()},
             'structure_patterns': len(self.structure_patterns),
-            'llm_config': self.llm_config
+            'llm_config': self.llm_config,
+            'training_sessions': len(self.training_history),
+            'performance_metrics_count': len(self.performance_metrics)
         } 

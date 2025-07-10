@@ -31,15 +31,24 @@ class EnhancedReinforcementTrainer:
         self, 
         samples: Dict[str, str], 
         test_prompts: List[str],
-        iterations: int = 5
+        iterations: int = 5,
+        incremental: bool = True
     ) -> Dict[str, any]:
-        """Train enhanced local model using OpenAI as teacher."""
+        """Train enhanced local model using OpenAI as teacher with continuous learning."""
         
         console.print("🎯 Starting enhanced reinforcement learning training...")
         
+        # Check learning progress
+        learning_summary = self.local_model.get_learning_summary()
+        if learning_summary['total_sessions'] > 0:
+            console.print(f"📈 Previous training sessions: {learning_summary['total_sessions']}")
+            console.print(f"📊 Best style score: {learning_summary['best_scores']['style']:.3f}")
+            console.print(f"📊 Best tone score: {learning_summary['best_scores']['tone']:.3f}")
+            console.print(f"📊 Best structure score: {learning_summary['best_scores']['structure']:.3f}")
+        
         # Initial training
         console.print("\n📚 Phase 1: Enhanced local model training")
-        initial_stats = self.local_model.train(samples)
+        initial_stats = self.local_model.train(samples, incremental=incremental)
         console.print(f"✅ Enhanced training complete: {initial_stats['vocabulary_size']} vocabulary items")
         console.print(f"📊 Extracted {initial_stats['common_phrases']} common phrases")
         # Safe tone markers count
@@ -66,22 +75,39 @@ class EnhancedReinforcementTrainer:
             
             # Analyze performance
             performance = self._analyze_performance(local_responses, teacher_feedback)
-            self.performance_metrics.append(performance)
+            
+            # Add performance metric to continuous learning
+            self.local_model.add_performance_metric(performance)
             
             # Update enhanced model based on feedback
             self._update_enhanced_model_from_feedback(teacher_feedback)
             
             console.print(f"📊 Iteration {iteration + 1} performance: {performance['overall_score']:.3f}")
+            
+            # Check if we should continue training
+            if iteration >= 2:  # Need at least 3 iterations to check convergence
+                continue_decision = self.local_model.should_continue_training()
+                if not continue_decision['continue']:
+                    console.print(f"🛑 Training stopped: {continue_decision['reason']}")
+                    if 'confidence' in continue_decision:
+                        console.print(f"📊 Confidence: {continue_decision['confidence']}")
+                    break
         
         # Final evaluation
         final_evaluation = self._evaluate_final_performance(test_prompts, samples)
         
+        # Get updated learning summary
+        final_learning_summary = self.local_model.get_learning_summary()
+        
         return {
             'initial_stats': initial_stats,
-            'performance_metrics': self.performance_metrics,
+            'performance_metrics': self.local_model.performance_metrics,
             'final_evaluation': final_evaluation,
-            'training_history': self.training_history,
-            'backend_used': self.backend_name
+            'training_history': self.local_model.training_history,
+            'learning_summary': final_learning_summary,
+            'backend_used': self.backend_name,
+            'convergence_analysis': self.local_model._get_convergence_status(),
+            'performance_trend': self.local_model._get_performance_trend()
         }
     
     def set_backend(self, backend_name: str) -> bool:
@@ -502,6 +528,24 @@ Suggestions: [list]"""
         console.print(f"   Tone Markers: {model_info['tone_markers']}")
         console.print(f"   Structure Patterns: {model_info['structure_patterns']}")
         console.print(f"   LLM Config: {model_info['llm_config']['model']}")
+        
+        # Show continuous learning information
+        if 'learning_summary' in results:
+            learning = results['learning_summary']
+            console.print(f"\n📈 Continuous Learning Summary:")
+            console.print(f"   Total Sessions: {learning['total_sessions']}")
+            console.print(f"   Total Samples: {learning['total_samples']}")
+            console.print(f"   Best Style Score: {learning['best_scores']['style']:.3f}")
+            console.print(f"   Best Tone Score: {learning['best_scores']['tone']:.3f}")
+            console.print(f"   Best Structure Score: {learning['best_scores']['structure']:.3f}")
+            
+            if 'convergence_analysis' in results:
+                conv = results['convergence_analysis']
+                console.print(f"   Convergence: {'✅ Yes' if conv['converged'] else '❌ No'} ({conv['confidence']})")
+            
+            if 'performance_trend' in results:
+                trend = results['performance_trend']
+                console.print(f"   Trend: {trend['trend']} (rate: {trend['improvement_rate']:.3f})")
     
     def save_enhanced_training_results(self, results: Dict[str, any], filename: str = None) -> None:
         """Save enhanced training results to file."""
@@ -518,6 +562,8 @@ Suggestions: [list]"""
                 return float(obj)
             elif isinstance(obj, np.ndarray):
                 return obj.tolist()
+            elif isinstance(obj, np.bool_):
+                return bool(obj)
             return obj
         
         # Deep convert

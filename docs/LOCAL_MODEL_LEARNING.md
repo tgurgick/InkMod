@@ -4,6 +4,12 @@
 
 InkMod's enhanced local model learning system combines lightweight LLMs with sophisticated pattern extraction to create a powerful, cost-effective writing style mirroring solution.
 
+> **ℹ️ Tip:** After training, you can inspect your learned model in detail using:
+> ```bash
+> inkmod explore --model-path enhanced_style_model.pkl --detailed
+> ```
+> For a full explanation of the model file structure, see [docs/MODEL_FILE_GUIDE.md](MODEL_FILE_GUIDE.md).
+
 ## Architecture
 
 ```mermaid

@@ -1,6 +1,7 @@
 """CLI commands for InkMod."""
 
 import json
+import os
 import sys
 from typing import Optional, List
 from pathlib import Path
@@ -402,7 +403,8 @@ def train(style_folder: str, test_prompts: str, iterations: int, model: str, out
 @click.option('--output-file', '-o', help='Save training results to file')
 @click.option('--use-lightweight-llm', is_flag=True, default=True, help='Use lightweight LLM for generation')
 @click.option('--backend', '-b', help='Local LLM backend to use (e.g., llama-7b, gpt4all-j, hf-distilgpt2)')
-def train_enhanced(style_folder: str, test_prompts: str, iterations: int, model: str, output_file: str, use_lightweight_llm: bool, backend: str):
+@click.option('--incremental/--fresh', default=True, help='Use incremental training (default) or start fresh')
+def train_enhanced(style_folder: str, test_prompts: str, iterations: int, model: str, output_file: str, use_lightweight_llm: bool, backend: str, incremental: bool):
     """Train an enhanced local style model using lightweight LLM integration."""
     
     try:
@@ -461,7 +463,7 @@ def train_enhanced(style_folder: str, test_prompts: str, iterations: int, model:
             console.print("📝 Using template-based generation")
         
         # Start enhanced training
-        results = trainer.train_with_reinforcement(samples, test_prompt_list, iterations)
+        results = trainer.train_with_reinforcement(samples, test_prompt_list, iterations, incremental)
         
         # Display enhanced results
         trainer.display_enhanced_training_results(results)
@@ -558,6 +560,278 @@ def backends(list: bool, info: str, test: str):
     except Exception as e:
         console.print(f"❌ Backend management failed: {e}")
         if config.get('debug', False):
+            console.print_exception()
+
+@cli.command()
+@click.option('--model-path', '-m', default='enhanced_style_model.pkl', help='Path to the trained model')
+def learning_progress(model_path: str):
+    """Show continuous learning progress and model statistics."""
+    
+    try:
+        from core.enhanced_style_model import EnhancedStyleModel
+        
+        # Load the model
+        model = EnhancedStyleModel(model_path)
+        
+        if not model.load_model():
+            console.print(f"❌ Model not found: {model_path}")
+            return
+        
+        # Get learning summary
+        summary = model.get_learning_summary()
+        
+        console.print("📊 Continuous Learning Progress")
+        console.print("=" * 50)
+        
+        # Basic statistics
+        console.print(f"📈 Total Training Sessions: {summary['total_sessions']}")
+        console.print(f"📝 Total Samples Processed: {summary['total_samples']}")
+        console.print(f"📚 Current Vocabulary Size: {summary['current_vocabulary_size']}")
+        console.print(f"📄 Current Samples Count: {summary['current_samples_count']}")
+        
+        # Best scores
+        console.print(f"\n🏆 Best Performance Scores:")
+        console.print(f"   Style Score: {summary['best_scores']['style']:.3f}")
+        console.print(f"   Tone Score: {summary['best_scores']['tone']:.3f}")
+        console.print(f"   Structure Score: {summary['best_scores']['structure']:.3f}")
+        
+        # Convergence analysis
+        convergence = summary['convergence_status']
+        console.print(f"\n🔄 Convergence Status:")
+        console.print(f"   Converged: {'✅ Yes' if convergence['converged'] else '❌ No'}")
+        console.print(f"   Confidence: {convergence['confidence']}")
+        if 'variance' in convergence:
+            console.print(f"   Variance: {convergence['variance']:.4f}")
+        
+        # Performance trend
+        trend = summary['performance_trend']
+        console.print(f"\n📈 Performance Trend:")
+        console.print(f"   Trend: {trend['trend']}")
+        console.print(f"   Improvement Rate: {trend['improvement_rate']:.3f}")
+        
+        # Training recommendations
+        console.print(f"\n💡 Training Recommendations:")
+        if convergence['converged']:
+            console.print("   ✅ Model has converged - consider stopping training")
+        elif trend['trend'] == 'improving':
+            console.print("   🔄 Model is still improving - continue training")
+        elif trend['trend'] == 'stable':
+            console.print("   ⚖️  Model is stable - try more iterations or new data")
+        elif trend['trend'] == 'declining':
+            console.print("   ⚠️  Performance declining - review training data")
+        else:
+            console.print("   📊 Insufficient data - continue training")
+        
+        # Last improvement
+        if summary['last_improvement']:
+            console.        print(f"\n🕒 Last Improvement: {summary['last_improvement']}")
+        
+    except Exception as e:
+        console.print(f"❌ Learning progress analysis failed: {e}")
+        if config.get('debug', False):
+            console.print_exception()
+
+@cli.command()
+@click.option('--model-path', '-m', default='enhanced_style_model.pkl', help='Path to the trained model')
+@click.option('--detailed/--summary', default=False, help='Show detailed analysis (default: summary)')
+@click.option('--export-json', help='Export model info to JSON file')
+def explore(model_path: str, detailed: bool, export_json: str):
+    """Explore and analyze a trained model in detail."""
+    
+    try:
+        from core.enhanced_style_model import EnhancedStyleModel
+        
+        # Load the model
+        model = EnhancedStyleModel(model_path)
+        
+        if not model.load_model():
+            console.print(f"❌ Model not found: {model_path}")
+            return
+        
+        # Get model info
+        model_info = model.get_model_info()
+        learning_summary = model.get_learning_summary()
+        
+        console.print("🔍 MODEL EXPLORER")
+        console.print("=" * 50)
+        
+        # Basic model information
+        console.print(f"📁 Model Path: {model_path}")
+        console.print(f"📊 File Size: {os.path.getsize(model_path)} bytes")
+        
+        # Core statistics
+        console.print(f"\n📈 CORE STATISTICS")
+        console.print("-" * 30)
+        console.print(f"Vocabulary Size: {model_info['vocabulary_size']} words")
+        console.print(f"Sentence Patterns: {model_info['sentence_patterns']}")
+        console.print(f"Paragraph Patterns: {model_info['paragraph_patterns']}")
+        console.print(f"Common Phrases: {model_info['common_phrases']}")
+        console.print(f"Training Sessions: {model_info['training_sessions']}")
+        console.print(f"Performance Records: {model_info['performance_metrics_count']}")
+        
+        # Tone analysis
+        console.print(f"\n🎭 TONE ANALYSIS")
+        console.print("-" * 30)
+        tone_markers = model_info['tone_markers']
+        total_markers = sum(tone_markers.values())
+        console.print(f"Total Tone Markers: {total_markers}")
+        for tone, count in tone_markers.items():
+            percentage = (count / total_markers * 100) if total_markers > 0 else 0
+            console.print(f"  {tone.capitalize()}: {count} markers ({percentage:.1f}%)")
+        
+        # Learning progress
+        console.print(f"\n🧠 LEARNING PROGRESS")
+        console.print("-" * 30)
+        console.print(f"Total Sessions: {learning_summary['total_sessions']}")
+        console.print(f"Total Samples: {learning_summary['total_samples']}")
+        
+        best_scores = learning_summary['best_scores']
+        console.print(f"\nBest Performance Scores:")
+        console.print(f"  Style: {best_scores['style']:.3f}")
+        console.print(f"  Tone: {best_scores['tone']:.3f}")
+        console.print(f"  Structure: {best_scores['structure']:.3f}")
+        
+        # Convergence analysis
+        convergence = learning_summary['convergence_status']
+        console.print(f"\nConvergence Status:")
+        console.print(f"  Converged: {'✅ Yes' if convergence['converged'] else '❌ No'}")
+        console.print(f"  Confidence: {convergence['confidence']}")
+        if 'variance' in convergence:
+            console.print(f"  Variance: {convergence['variance']:.6f}")
+        
+        # Performance trend
+        trend = learning_summary['performance_trend']
+        console.print(f"\nPerformance Trend:")
+        console.print(f"  Trend: {trend['trend']}")
+        console.print(f"  Improvement Rate: {trend['improvement_rate']:.3f}")
+        
+        if detailed:
+            # Detailed analysis
+            console.print(f"\n📊 DETAILED ANALYSIS")
+            console.print("-" * 30)
+            
+            # Vocabulary analysis
+            vocabulary = model.vocabulary
+            top_words = vocabulary.most_common(10)
+            console.print(f"\nTop 10 Most Frequent Words:")
+            for word, count in top_words:
+                console.print(f"  '{word}': {count} times")
+            
+            # Word length analysis
+            word_lengths = [len(word) for word in vocabulary.keys()]
+            avg_length = sum(word_lengths) / len(word_lengths)
+            console.print(f"\nVocabulary Analysis:")
+            console.print(f"  Average word length: {avg_length:.2f} characters")
+            console.print(f"  Shortest word: {min(word_lengths)} characters")
+            console.print(f"  Longest word: {max(word_lengths)} characters")
+            
+            # Sentence pattern analysis
+            if model.sentence_patterns:
+                lengths = [p['length'] for p in model.sentence_patterns]
+                avg_length = sum(lengths) / len(lengths)
+                console.print(f"\nSentence Pattern Analysis:")
+                console.print(f"  Average sentence length: {avg_length:.1f} words")
+                console.print(f"  Min sentence length: {min(lengths)} words")
+                console.print(f"  Max sentence length: {max(lengths)} words")
+            
+            # Training history details
+            console.print(f"\n📈 TRAINING HISTORY DETAILS")
+            console.print("-" * 30)
+            for i, session in enumerate(model.training_history, 1):
+                console.print(f"\nSession {i}:")
+                console.print(f"  Timestamp: {session.get('timestamp', 'Unknown')}")
+                console.print(f"  Samples processed: {session.get('samples_count', 0)}")
+                console.print(f"  Total characters: {session.get('total_characters', 0)}")
+                console.print(f"  Incremental: {session.get('incremental', False)}")
+                console.print(f"  Previous vocab size: {session.get('previous_vocabulary_size', 0)}")
+            
+            # Performance metrics details
+            if model.performance_metrics:
+                console.print(f"\n📊 PERFORMANCE METRICS DETAILS")
+                console.print("-" * 30)
+                for i, metric in enumerate(model.performance_metrics, 1):
+                    console.print(f"\nIteration {i}:")
+                    console.print(f"  Overall score: {metric.get('overall_score', 0):.3f}")
+                    console.print(f"  Tone score: {metric.get('tone_score', 0):.3f}")
+                    console.print(f"  Structure score: {metric.get('structure_score', 0):.3f}")
+                    console.print(f"  Cost: ${metric.get('total_cost', 0):.4f}")
+                    if 'timestamp' in metric:
+                        console.print(f"  Timestamp: {metric['timestamp']}")
+            
+            # Style characteristics
+            if model.style_characteristics:
+                console.print(f"\n🎨 STYLE CHARACTERISTICS")
+                console.print("-" * 30)
+                for key, value in model.style_characteristics.items():
+                    if isinstance(value, float):
+                        console.print(f"  {key}: {value:.3f}")
+                    else:
+                        console.print(f"  {key}: {value}")
+            
+            # Sample common phrases
+            if model.common_phrases:
+                console.print(f"\n💬 SAMPLE COMMON PHRASES")
+                console.print("-" * 30)
+                for phrase in model.common_phrases[:10]:
+                    console.print(f"  '{phrase}'")
+            
+            # Sample training data
+            if model.training_samples:
+                console.print(f"\n📖 SAMPLE TRAINING DATA")
+                console.print("-" * 30)
+                for i, sample in enumerate(model.training_samples[:2], 1):
+                    preview = sample[:200] + "..." if len(sample) > 200 else sample
+                    console.print(f"  Sample {i}: {preview}")
+        
+        # Export to JSON if requested
+        if export_json:
+            try:
+                import json
+                
+                # Prepare data for JSON export
+                export_data = {
+                    'model_info': model_info,
+                    'learning_summary': learning_summary,
+                    'vocabulary_size': len(model.vocabulary),
+                    'top_words': dict(model.vocabulary.most_common(20)),
+                    'tone_markers': model.tone_markers,
+                    'training_history': model.training_history,
+                    'performance_metrics': model.performance_metrics,
+                    'style_characteristics': model.style_characteristics,
+                    'llm_config': model.llm_config
+                }
+                
+                with open(export_json, 'w') as f:
+                    json.dump(export_data, f, indent=2)
+                
+                console.print(f"\n💾 Model data exported to: {export_json}")
+                
+            except Exception as e:
+                console.print(f"❌ Failed to export JSON: {e}")
+        
+        # Training recommendations
+        console.print(f"\n💡 TRAINING RECOMMENDATIONS")
+        console.print("-" * 30)
+        
+        if convergence['converged']:
+            console.print("  ✅ Model has converged - consider stopping training")
+        elif trend['trend'] == 'improving':
+            console.print("  🔄 Model is still improving - continue training")
+        elif trend['trend'] == 'stable':
+            console.print("  ⚖️  Model is stable - try more iterations or new data")
+        elif trend['trend'] == 'declining':
+            console.print("  ⚠️  Performance declining - review training data")
+        else:
+            console.print("  📊 Insufficient data - continue training")
+        
+        if learning_summary['total_sessions'] < 3:
+            console.print("  📈 Consider more training sessions for better performance")
+        
+        console.print(f"\n✅ Model exploration complete!")
+        
+    except Exception as e:
+        console.print(f"❌ Model exploration failed: {e}")
+        if settings.DEBUG:
             console.print_exception()
 
 def _handle_edit_mode(original_response: str, user_input: str, style_folder: str) -> str:
