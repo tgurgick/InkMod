@@ -1,12 +1,22 @@
-click>=8.1.0
+# Core dependencies
 openai>=1.0.0
-python-dotenv>=1.0.0
-pyyaml>=6.0
 rich>=13.0.0
-tiktoken>=0.5.0
+click>=8.0.0
+numpy>=1.21.0
+pathlib2>=2.3.0
 
-# Optional local LLM dependencies (install as needed)
-llama-cpp-python>=0.2.0  # For Llama.cpp backends
-# gpt4all>=1.0.0  # For GPT4All backends  
-# transformers>=4.30.0  # For HuggingFace backends
-# torch>=2.0.0  # For HuggingFace backends 
+# Optional local LLM backends
+# Uncomment the backends you want to use:
+
+# Llama.cpp backend
+# llama-cpp-python>=0.2.0
+
+# GPT4All backend  
+# gpt4all>=2.0.0
+
+# HuggingFace Transformers backend
+# transformers>=4.30.0
+# torch>=2.0.0
+
+# NLP metrics for hybrid reward function
+nltk>=3.8.0 

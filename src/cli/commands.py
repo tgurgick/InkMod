@@ -495,6 +495,84 @@ def train_enhanced(style_folder: str, test_prompts: str, iterations: int, model:
             console.print_exception()
 
 @cli.command()
+@click.option('--style-folder', '-s', required=True, help='Folder containing writing style samples')
+@click.option('--test-prompts', '-t', required=True, help='File containing test prompts (one per line)')
+@click.option('--iterations', '-i', type=int, default=5, help='Number of training iterations')
+@click.option('--model', '-m', help='OpenAI model to use (defaults to config)')
+@click.option('--output-file', '-o', help='Save training results to file')
+@click.option('--use-lightweight-llm', is_flag=True, help='Use lightweight LLM for generation')
+@click.option('--backend', '-b', help='Local LLM backend to use (e.g., llama-7b, gpt4all-j, hf-distilgpt2)')
+@click.option('--incremental/--fresh', default=True, help='Use incremental training (default) or start fresh')
+@click.option('--no-llm-feedback', is_flag=True, help='Disable LLM qualitative feedback (use only standard metrics)')
+def train_hybrid(style_folder: str, test_prompts: str, iterations: int, model: str, output_file: str, use_lightweight_llm: bool, backend: str, incremental: bool, no_llm_feedback: bool):
+    """Train an enhanced local style model using hybrid reward function (standard NLP metrics + LLM feedback)."""
+    
+    try:
+        # Initialize components
+        config = load_config()
+        openai_client = OpenAIClient(
+            api_key=config['openai']['api_key'],
+            model=model or config['openai']['model']
+        )
+        
+        # Load style samples
+        file_processor = FileProcessor()
+        samples = file_processor.process_style_folder(style_folder)
+        
+        if not samples:
+            console.print("❌ No style samples found in the specified folder.")
+            return
+        
+        console.print(f"📁 Loaded {len(samples)} style samples from {style_folder}")
+        
+        # Load test prompts
+        try:
+            with open(test_prompts, 'r') as f:
+                test_prompt_list = [line.strip() for line in f if line.strip()]
+        except FileNotFoundError:
+            console.print(f"❌ Test prompts file not found: {test_prompts}")
+            return
+        
+        if not test_prompt_list:
+            console.print("❌ No test prompts found in file.")
+            return
+        
+        console.print(f"📝 Loaded {len(test_prompt_list)} test prompts")
+        
+        # Initialize hybrid reinforcement trainer
+        from core.hybrid_reinforcement_trainer import HybridReinforcementTrainer
+        trainer = HybridReinforcementTrainer(openai_client, backend_name=backend)
+        
+        # Set backend if specified
+        if backend:
+            trainer.local_model.set_backend(backend)
+        
+        # Start hybrid training
+        results = trainer.train_with_hybrid_reinforcement(
+            samples=samples,
+            test_prompts=test_prompt_list,
+            iterations=iterations,
+            incremental=incremental,
+            use_llm_feedback=not no_llm_feedback
+        )
+        
+        # Display results
+        trainer.display_hybrid_training_results(results)
+        
+        # Save results
+        if output_file:
+            trainer.save_hybrid_training_results(results, output_file)
+        else:
+            trainer.save_hybrid_training_results(results)
+        
+        console.print("\n✅ Hybrid training complete!")
+        
+    except Exception as e:
+        console.print(f"❌ Hybrid training failed: {e}")
+        if config.get('debug', False):
+            console.print_exception()
+
+@cli.command()
 @click.option('--list', '-l', is_flag=True, help='List available backends')
 @click.option('--info', '-i', help='Get information about a specific backend')
 @click.option('--test', '-t', help='Test a specific backend with a sample prompt')

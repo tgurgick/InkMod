@@ -37,6 +37,76 @@ InkMod implements **imitation learning** (also called learning from demonstratio
 
 This approach allows InkMod to capture the nuanced patterns that make your writing uniquely yours, from vocabulary choices to structural preferences.
 
+## Hybrid Reward Function: Standard NLP Metrics + LLM Feedback
+
+InkMod now features a **hybrid reward function** that combines objective NLP metrics with optional LLM qualitative feedback, addressing the limitations of LLM-only scoring.
+
+### **How the Hybrid Reward Function Works**
+
+#### **1. Standard NLP Metrics (Objective Scoring)**
+The system calculates reliable, reproducible metrics:
+
+- **BLEU Score**: Measures n-gram overlap with reference samples (style similarity)
+- **ROUGE Score**: Evaluates vocabulary and phrase overlap (content similarity)  
+- **Consistency Score**: Measures vocabulary overlap with training data (style consistency)
+- **Length Score**: Compares sentence/paragraph structure similarity
+- **Tone Score**: Evaluates tone marker usage consistency
+
+#### **2. LLM Qualitative Feedback (Optional)**
+When enabled, provides detailed, actionable suggestions:
+
+- **Vocabulary improvements**: Specific word suggestions
+- **Tone adjustments**: Formal/casual/professional guidance
+- **Structural recommendations**: Sentence length and organization tips
+- **Style enhancements**: Detailed writing style improvements
+
+#### **3. Combined Reward**
+```python
+overall_score = (
+    0.3 * bleu_score +      # Style similarity
+    0.2 * rouge_score +     # Vocabulary overlap
+    0.2 * consistency_score + # Style consistency
+    0.15 * length_score +   # Structural similarity
+    0.15 * tone_score       # Tone consistency
+)
+```
+
+### **Benefits Over LLM-Only Scoring**
+
+| Aspect | LLM-Only Scoring | Hybrid Approach |
+|--------|------------------|-----------------|
+| **Consistency** | ❌ Variable scores | ✅ Reproducible results |
+| **Speed** | ⏳ API latency | ⚡ Instant metrics |
+| **Cost** | 💰 Every evaluation | 💰 Only when needed |
+| **Objectivity** | ❌ Subjective | ✅ Standard metrics |
+| **Guidance** | ✅ Detailed feedback | ✅ Detailed feedback |
+
+### **Usage Examples**
+
+```bash
+# Standard metrics only (no API cost)
+python -m src.cli.main train-hybrid -s samples/ -t prompts.txt --no-llm-feedback
+
+# Full hybrid approach (metrics + LLM feedback)
+python -m src.cli.main train-hybrid -s samples/ -t prompts.txt
+
+# With local LLM backend
+python -m src.cli.main train-hybrid -s samples/ -t prompts.txt --backend llama-7b
+```
+
+### **Sample Results**
+```
+🎯 Final Performance: 0.349
+📊 BLEU Score: 0.034      (style similarity)
+📊 ROUGE Score: 0.494     (vocabulary overlap)
+📊 Consistency Score: 0.695 (style consistency)
+📊 Length Score: 0.587    (structural similarity)
+📊 Tone Score: 0.086      (tone consistency)
+💰 LLM feedback cost: $0.0000 (standard metrics only)
+```
+
+This approach provides the reliability of standard NLP metrics while maintaining the nuanced guidance that only an LLM can offer for writing style improvement.
+
 ## 🎯 Performance Scoring
 
 InkMod uses a comprehensive scoring system to evaluate style matching quality:
