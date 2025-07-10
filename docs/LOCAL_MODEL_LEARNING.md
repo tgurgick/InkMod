@@ -181,6 +181,8 @@ print(f"Tone markers: {stats['tone_markers']}")
 ```
 
 #### Phase 2: Iterative Improvement
+
+**Standard Enhanced Training:**
 ```python
 for iteration in range(iterations):
     # Generate with local model
@@ -196,10 +198,34 @@ for iteration in range(iterations):
     performance = analyze_performance(local_responses, feedback)
 ```
 
+**Hybrid Reward Training (Recommended):**
+```python
+for iteration in range(iterations):
+    # Generate with local model
+    local_responses = model.generate_responses(test_prompts)
+    
+    # Calculate standard NLP metrics
+    bleu_scores = calculate_bleu(local_responses, reference_samples)
+    rouge_scores = calculate_rouge(local_responses, reference_samples)
+    perplexity = calculate_perplexity(local_responses)
+    
+    # Get optional LLM qualitative feedback
+    llm_feedback = get_llm_feedback(local_responses, samples)
+    
+    # Combine metrics for hybrid reward
+    hybrid_reward = combine_metrics(bleu_scores, rouge_scores, perplexity, llm_feedback)
+    
+    # Update model with hybrid reward
+    model.update_from_hybrid_reward(hybrid_reward)
+```
+
 #### Phase 3: Performance Analysis
 - **Style Similarity**: How well responses match the target style
 - **Tone Consistency**: Appropriate tone usage
 - **Structure Quality**: Sentence and paragraph structure
+- **BLEU Score**: N-gram overlap with reference samples
+- **ROUGE Score**: Recall-oriented metrics for text generation
+- **Perplexity**: Language model confidence in generated text
 - **Cost Comparison**: Local vs OpenAI costs
 
 ## Benefits of Multi-Backend System
@@ -224,6 +250,33 @@ for iteration in range(iterations):
 - No data sent to external APIs
 - Complete control over model and data
 
+## Hybrid Reward Function Benefits
+
+### 1. Reproducible Metrics
+- **BLEU Score**: Measures n-gram overlap with reference samples
+- **ROUGE Score**: Evaluates recall and precision of generated text
+- **Perplexity**: Indicates language model confidence in generation
+- **Length Consistency**: Ensures appropriate response length
+- **Tone Matching**: Validates tone consistency with reference
+
+### 2. Objective Evaluation
+- Standard NLP metrics provide consistent, reproducible scores
+- No dependency on LLM availability for core evaluation
+- Quantitative feedback for model improvement
+- Clear performance benchmarks
+
+### 3. Optional LLM Guidance
+- LLM feedback provides qualitative insights when available
+- Combines best of both worlds: objective metrics + subjective guidance
+- Graceful degradation when LLM is unavailable
+- Cost-effective training with minimal API usage
+
+### 4. Better Training Stability
+- Consistent reward signals across training iterations
+- Reduced variance in model updates
+- More predictable convergence behavior
+- Improved training efficiency
+
 ## Usage Examples
 
 ### Basic Training with Backend
@@ -234,6 +287,29 @@ inkmod train-enhanced \
   --test-prompts test-prompts.txt \
   --backend llama-7b \
   --iterations 5
+```
+
+### Hybrid Reward Training (Recommended)
+```bash
+# Train with hybrid reward function (standard metrics + optional LLM feedback)
+inkmod train-hybrid \
+  --style-folder writing-samples/ \
+  --test-prompts test-prompts.txt \
+  --backend llama-7b \
+  --iterations 5 \
+  --use-llm-feedback  # Optional: include LLM qualitative feedback
+```
+
+### Training Comparison
+```bash
+# Standard enhanced training
+inkmod train-enhanced --style-folder samples/ --iterations 3
+
+# Hybrid training with standard metrics only
+inkmod train-hybrid --style-folder samples/ --iterations 3
+
+# Hybrid training with LLM feedback
+inkmod train-hybrid --style-folder samples/ --iterations 3 --use-llm-feedback
 ```
 
 ### Backend Comparison
@@ -266,9 +342,17 @@ backend = LlamaCppBackend('models/custom-model.ggml', custom_config)
 - **Tone Diversity**: Variety of tone markers identified
 - **Style Score**: Overall style similarity (0-1)
 
+### Hybrid Reward Metrics
+- **BLEU Score**: N-gram overlap with reference samples (0-1)
+- **ROUGE Score**: Recall-oriented text generation metrics (0-1)
+- **Perplexity**: Language model confidence in generated text
+- **Length Consistency**: Response length vs reference average
+- **Tone Matching**: Tone consistency with reference samples
+
 ### Cost Analysis
 - **Local Generation Cost**: Minimal (hardware only)
-- **OpenAI Teacher Cost**: ~$0.002 per feedback cycle
+- **Standard Metrics Cost**: Zero (no API calls needed)
+- **LLM Feedback Cost**: ~$0.002 per feedback cycle (optional)
 - **Total Training Cost**: Significantly reduced vs pure OpenAI
 
 ### Quality Metrics
@@ -276,6 +360,7 @@ backend = LlamaCppBackend('models/custom-model.ggml', custom_config)
 - **Tone Appropriateness**: Correct tone usage
 - **Structural Quality**: Sentence and paragraph structure
 - **Readability**: Natural flow and coherence
+- **Reproducibility**: Consistent evaluation across runs
 
 ## Future Enhancements
 
