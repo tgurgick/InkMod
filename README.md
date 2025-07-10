@@ -4,6 +4,39 @@
 
 InkMod is an open-source CLI tool that analyzes a user's writing style from provided examples and generates responses that match that style using OpenAI's API. This is currently in MVP (Minimum Viable Product) phase with core functionality implemented.
 
+## About InkMod: Imitation Learning for Writing Style
+
+InkMod implements **imitation learning** (also called learning from demonstration or behavioral cloning) to mirror your writing style. Here's how it works:
+
+### **Core Imitation Learning Approach:**
+
+1. **Demonstration Data**: Your writing samples serve as "expert demonstrations" of your writing style
+2. **Behavior Cloning**: The model learns to mimic your specific patterns, vocabulary, tone, and structure  
+3. **Policy Learning**: It develops a "policy" (the learned model) that tries to reproduce your writing behavior
+4. **Supervised Learning**: The training process uses your examples as ground truth
+
+### **Key Imitation Learning Elements:**
+
+- **Style Imitation**: Vocabulary, sentence patterns, tone markers, and common phrases
+- **Behavioral Patterns**: How you structure emails, use contractions, choose formality levels
+- **Policy Representation**: The `enhanced_style_model.pkl` contains the learned "writing policy"
+- **Feedback Loop**: Reinforcement training uses OpenAI to evaluate how well the imitation matches your style
+
+### **What Makes InkMod Unique:**
+
+- **Multi-modal imitation**: Learns not just content but comprehensive style characteristics
+- **Continuous learning**: The model improves over multiple training sessions with convergence detection
+- **Hybrid approach**: Combines imitation learning with reinforcement learning for evaluation
+- **Local deployment**: Once trained, can generate responses without external APIs
+
+### **In Machine Learning Terms:**
+- **Expert Demonstrations** = Your writing samples
+- **Learned Policy** = The enhanced style model  
+- **Behavior Cloning** = The template-based generation
+- **Policy Evaluation** = The scoring system (style, tone, structure scores)
+
+This approach allows InkMod to capture the nuanced patterns that make your writing uniquely yours, from vocabulary choices to structural preferences.
+
 ## 🎯 Performance Scoring
 
 InkMod uses a comprehensive scoring system to evaluate style matching quality:
