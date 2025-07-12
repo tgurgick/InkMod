@@ -21,7 +21,7 @@ Line 1: Hello there! I hope this email finds you well.
 Line 2: I wanted to follow up on our recent conversation about the project timeline.
 Line 3: We discussed several key milestones that need to be completed by the end of the month.
 
-Redline Commands: <number> | save | quit | show
+Redline Commands: <number> | save | quit | show | back
 ```
 
 ### **3. Precise Editing**
@@ -29,7 +29,7 @@ Redline Commands: <number> | save | quit | show
 Command: 1
 Editing Line 1:
 Original: Hello there! I hope this email finds you well.
-New version: Hi there! I hope you're doing well.
+New version (or 'back' to cancel): Hi there! I hope you're doing well.
 ✅ Line 1 updated!
 ```
 
@@ -142,11 +142,11 @@ Generated Content:
 Line 1: Hello there! I hope this email finds you well.
 Line 2: I wanted to follow up on our recent conversation about the project timeline.
 
-Redline Commands: <number> | save | quit | show
+Redline Commands: <number> | save | quit | show | back
 Command: 1
 Editing Line 1:
 Original: Hello there! I hope this email finds you well.
-New version: Hi there! I hope you're doing well.
+New version (or 'back' to cancel): Hi there! I hope you're doing well.
 ✅ Line 1 updated!
 ```
 
@@ -181,6 +181,15 @@ Editing Line 3: [make edit]
 Command: save
 💾 Redline feedback saved to feedback.json
 📊 Captured 2 revision pairs for training
+```
+
+### **Cancelling an Edit**
+```
+Command: 2
+Editing Line 2:
+Original: I wanted to follow up on our recent conversation about the project timeline.
+New version (or 'back' to cancel): back
+🔄 Cancelled editing - back to main menu
 ```
 
 ### **Batch Feedback Application**
@@ -253,6 +262,10 @@ inkmod learning-progress
 #### **Feedback File Issues**
 - **Cause**: Corrupted or invalid feedback file
 - **Solution**: Check file format and regenerate if needed
+
+#### **Stuck in Edit Mode**
+- **Cause**: Accidentally typed wrong number or got confused
+- **Solution**: Type 'back' when prompted for new version to cancel and return to main menu
 
 ### **Debug Commands**
 ```bash

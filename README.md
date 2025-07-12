@@ -274,6 +274,7 @@ inkmod redline --style-folder ./writing-samples --input "Write a professional em
 - `show` - Show current content
 - `save` - Save changes and capture feedback
 - `quit` - Exit without saving
+- `back` - Go back to main menu (when editing a line, type 'back' to cancel)
 
 **Example Workflow:**
 ```
@@ -283,11 +284,11 @@ Line 1: Hello there! I hope this email finds you well.
 Line 2: I wanted to follow up on our recent conversation about the project timeline.
 Line 3: We discussed several key milestones that need to be completed by the end of the month.
 
-Redline Commands: <number> | save | quit | show
+Redline Commands: <number> | save | quit | show | back
 Command: 1
 Editing Line 1:
 Original: Hello there! I hope this email finds you well.
-New version: Hi there! I hope you're doing well.
+New version (or 'back' to cancel): Hi there! I hope you're doing well.
 ✅ Line 1 updated!
 
 Command: save

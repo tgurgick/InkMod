@@ -1101,7 +1101,7 @@ def _handle_redline_mode(original_response: str, user_input: str, style_folder: 
     current_sentences = sentences.copy()
     
     while True:
-        console.print(f"\n[bold cyan]Redline Commands:[/bold cyan] <number> | save | quit | show")
+        console.print(f"\n[bold cyan]Redline Commands:[/bold cyan] <number> | save | quit | show | back")
         command = Prompt.ask("Command").strip().lower()
         
         if command == 'quit':
@@ -1124,6 +1124,10 @@ def _handle_redline_mode(original_response: str, user_input: str, style_folder: 
                 console.print(f"Line {i}: {sentence}")
             continue
             
+        elif command == 'back':
+            console.print("🔄 Back to main menu")
+            continue
+            
         elif command.isdigit():
             try:
                 line_num = int(command)
@@ -1132,10 +1136,13 @@ def _handle_redline_mode(original_response: str, user_input: str, style_folder: 
                     console.print(f"\n[bold]Editing Line {line_num}:[/bold]")
                     console.print(f"Original: {original_sentence}")
                     
-                    # Get new sentence
-                    new_sentence = Prompt.ask("New version")
+                    # Get new sentence with back option
+                    new_sentence = Prompt.ask("New version (or 'back' to cancel)")
                     
-                    if new_sentence.strip() != original_sentence:
+                    if new_sentence.strip().lower() == 'back':
+                        console.print("🔄 Cancelled editing - back to main menu")
+                        continue
+                    elif new_sentence.strip() != original_sentence:
                         # Store feedback pair
                         feedback_pairs.append({
                             'line_number': line_num,
@@ -1161,7 +1168,7 @@ def _handle_redline_mode(original_response: str, user_input: str, style_folder: 
             continue
             
         else:
-            console.print("❌ Unknown command. Use: <number> | save | quit | show")
+            console.print("❌ Unknown command. Use: <number> | save | quit | show | back")
             continue
     
     # Return final content
