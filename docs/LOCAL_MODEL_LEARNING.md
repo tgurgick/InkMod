@@ -198,26 +198,50 @@ for iteration in range(iterations):
     performance = analyze_performance(local_responses, feedback)
 ```
 
-**Hybrid Reward Training (Recommended):**
-```python
-for iteration in range(iterations):
-    # Generate with local model
-    local_responses = model.generate_responses(test_prompts)
-    
-    # Calculate standard NLP metrics
-    bleu_scores = calculate_bleu(local_responses, reference_samples)
-    rouge_scores = calculate_rouge(local_responses, reference_samples)
-    perplexity = calculate_perplexity(local_responses)
-    
-    # Get optional LLM qualitative feedback
-    llm_feedback = get_llm_feedback(local_responses, samples)
-    
-    # Combine metrics for hybrid reward
-    hybrid_reward = combine_metrics(bleu_scores, rouge_scores, perplexity, llm_feedback)
-    
-    # Update model with hybrid reward
-    model.update_from_hybrid_reward(hybrid_reward)
+#### Phase 3: Redline Feedback Learning ✅ NEW
+
+**User-Driven Feedback Learning:**
+The redline feature enables precise, user-driven model improvement:
+
+```bash
+# Generate content and edit sentence by sentence
+inkmod redline --style-folder samples/ --input "Write a professional email"
+
+# Apply captured feedback to model
+inkmod apply-feedback --model-path enhanced_style_model.pkl
 ```
+
+**Redline Learning Process:**
+1. **Content Generation**: Generate initial response using style model
+2. **Sentence-by-Sentence Review**: Display numbered sentences for editing
+3. **Precise Feedback Capture**: Record before/after pairs for each edit
+4. **Model Update**: Apply feedback to improve vocabulary, tone, and patterns
+5. **Continuous Learning**: Model adapts to user preferences over time
+
+**Feedback Data Structure:**
+```json
+{
+  "original_input": "Write a professional email",
+  "original_response": "Dear Sir/Madam...",
+  "final_response": "Hi there...",
+  "feedback_pairs": [
+    {
+      "line_number": 1,
+      "before": "Dear Sir/Madam",
+      "after": "Hi there",
+      "feedback_type": "sentence_revision"
+    }
+  ],
+  "feedback_type": "redline_revisions"
+}
+```
+
+**Learning Benefits:**
+- **Precise Corrections**: Edit specific sentences, not entire responses
+- **"This, Not That" Learning**: Clear before/after pairs for training
+- **User-Driven**: Model learns from real user preferences
+- **Incremental**: Each edit improves the model's style matching
+- **Transparent**: Can inspect vocabulary and patterns learned
 
 #### Phase 3: Performance Analysis
 - **Style Similarity**: How well responses match the target style

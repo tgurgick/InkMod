@@ -148,6 +148,7 @@ InkMod uses a comprehensive scoring system to evaluate style matching quality:
 - **Interactive Mode**: Real-time style mirroring with immediate feedback
 - **Batch Processing**: Process multiple inputs at once
 - **Feedback System**: Capture user edits to improve future generations
+- **Redline Mode**: Sentence-by-sentence editing with precise feedback capture
 - **AI-Powered Analysis**: Use OpenAI to generate nuanced style guides
 - **Model Inspection**: Explore and export learned models with the `explore` command
 
@@ -260,6 +261,45 @@ Generate and edit responses while capturing feedback:
 ```bash
 inkmod generate --style-folder ./writing-samples --input "Write a blog post" --edit-mode
 ```
+
+### Redline Mode (Sentence-by-Sentence Editing)
+
+Generate content and edit it sentence by sentence with precise feedback capture:
+```bash
+inkmod redline --style-folder ./writing-samples --input "Write a professional email"
+```
+
+**Redline Commands:**
+- `<number>` - Edit a specific sentence (e.g., `1` for line 1)
+- `show` - Show current content
+- `save` - Save changes and capture feedback
+- `quit` - Exit without saving
+
+**Example Workflow:**
+```
+🔴 Redline Mode
+Generated Content:
+Line 1: Hello there! I hope this email finds you well.
+Line 2: I wanted to follow up on our recent conversation about the project timeline.
+Line 3: We discussed several key milestones that need to be completed by the end of the month.
+
+Redline Commands: <number> | save | quit | show
+Command: 1
+Editing Line 1:
+Original: Hello there! I hope this email finds you well.
+New version: Hi there! I hope you're doing well.
+✅ Line 1 updated!
+
+Command: save
+✅ Changes saved and feedback captured for training!
+```
+
+**Apply Redline Feedback to Model:**
+```bash
+inkmod apply-feedback --model-path enhanced_style_model.pkl
+```
+
+📖 **For detailed redline usage and learning process, see [docs/REDLINE_FEEDBACK_GUIDE.md](docs/REDLINE_FEEDBACK_GUIDE.md)**
 
 ### Check Learning Progress
 
@@ -401,8 +441,8 @@ OPENAI_MAX_TOKENS=1000
 - ✅ **MVP Complete**: Core functionality implemented
 - ✅ **Style Validation**: Compare different analysis methods
 - ✅ **Reinforcement Learning**: Local model training with OpenAI teacher
-- 🔄 **Phase 2**: Enhanced feedback system (in progress)
-- 📋 **Phase 3**: Advanced features and templates (planned)
+- ✅ **Phase 2 Complete**: Enhanced feedback system with redline functionality
+- 📋 **Phase 3**: Advanced features and templates (style templates, analytics dashboard)
 - 🌐 **Phase 4**: Web frontend (planned)
 
 ### Project Structure
@@ -447,7 +487,7 @@ We welcome contributions! Since this is a work in progress, there are many oppor
 
 ### Current Development Priorities
 
-- **Phase 2**: Enhanced feedback system and learning capabilities
+- **Phase 3**: Advanced features and templates (style templates, analytics dashboard)
 - **Testing**: More comprehensive test coverage
 - **Documentation**: Better examples and tutorials
 - **Performance**: Optimize token usage and response times

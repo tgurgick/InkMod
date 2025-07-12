@@ -20,6 +20,39 @@ The original system used OpenAI as a "teacher" to evaluate responses:
 - High API costs
 - Slow evaluation (API latency)
 
+### Redline Feedback Learning ✅ NEW
+
+**User-Driven Feedback System:**
+The redline feature provides direct, user-driven feedback for model improvement:
+
+- **Precise Corrections**: Edit specific sentences, not entire responses
+- **"This, Not That" Learning**: Clear before/after pairs for training
+- **Zero API Cost**: No OpenAI calls required for feedback
+- **Immediate Learning**: Model updates based on real user preferences
+
+**Redline Workflow:**
+```bash
+# Generate and edit content
+inkmod redline --style-folder samples/ --input "Write a professional email"
+
+# Apply feedback to model
+inkmod apply-feedback --model-path enhanced_style_model.pkl
+```
+
+**Feedback Learning Process:**
+1. **Generate Content**: Create initial response using style model
+2. **Review Sentences**: Display numbered sentences for editing
+3. **Capture Corrections**: Record before/after pairs for each edit
+4. **Update Model**: Apply feedback to improve vocabulary, tone, patterns
+5. **Continuous Improvement**: Model adapts to user preferences over time
+
+**Benefits Over Traditional Scoring:**
+- **User-Driven**: Real user preferences, not AI evaluation
+- **Cost-Effective**: No API calls for feedback
+- **Precise**: Specific sentence-level corrections
+- **Transparent**: Can inspect exactly what was learned
+- **Immediate**: Instant feedback application
+
 ### Hybrid Reward Function (Recommended)
 
 The new hybrid approach combines **standard NLP metrics** with **optional LLM feedback**:

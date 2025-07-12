@@ -658,6 +658,112 @@ Write a response to: {{prompt}}"""
         # Save updated model
         self.save_model()
     
+    def update_from_redline_feedback(self, feedback_pairs: List[Dict[str, any]]) -> None:
+        """Update model based on redline feedback pairs (before/after sentences)."""
+        
+        console.print(f"🔄 Applying {len(feedback_pairs)} redline feedback pairs to model...")
+        
+        # Track changes for learning progress
+        vocabulary_additions = 0
+        phrase_additions = 0
+        tone_updates = 0
+        
+        for pair in feedback_pairs:
+            before_sentence = pair['before']
+            after_sentence = pair['after']
+            
+            # Extract words from the "after" sentence (preferred version)
+            after_words = after_sentence.lower().split()
+            
+            # Update vocabulary with preferred words
+            self.vocabulary.update(after_words)
+            vocabulary_additions += len(after_words)
+            
+            # Extract phrases from the preferred sentence
+            for length in range(2, min(5, len(after_words) + 1)):
+                for i in range(len(after_words) - length + 1):
+                    phrase = ' '.join(after_words[i:i+length])
+                    if len(phrase) > length * 2 and phrase not in self.common_phrases:
+                        self.common_phrases.append(phrase)
+                        phrase_additions += 1
+            
+            # Analyze tone differences
+            before_tone = self._extract_tone_indicators(before_sentence)
+            after_tone = self._extract_tone_indicators(after_sentence)
+            
+            # Update tone markers based on preferred version
+            for tone, count in after_tone.items():
+                if count > 0:
+                    # Extract tone-specific words from the preferred sentence
+                    tone_words = self._extract_tone_specific_words(after_sentence, tone)
+                    if tone_words:
+                        if tone not in self.tone_markers:
+                            self.tone_markers[tone] = []
+                        self.tone_markers[tone].extend(tone_words)
+                        tone_updates += len(tone_words)
+            
+            # Update sentence patterns with the preferred version
+            after_structure = self._analyze_sentence_structure(after_sentence)
+            after_tone_indicators = self._extract_tone_indicators(after_sentence)
+            
+            self.sentence_patterns.append({
+                'length': after_structure['word_count'],
+                'avg_word_length': after_structure['avg_word_length'],
+                'has_contractions': after_structure['has_contractions'],
+                'tone_indicators': after_tone_indicators,
+                'punctuation': after_structure['punctuation']
+            })
+        
+        # Remove duplicates from tone markers
+        for tone in self.tone_markers:
+            self.tone_markers[tone] = list(set(self.tone_markers[tone]))
+        
+        # Update style characteristics
+        self.style_characteristics = self._calculate_style_characteristics()
+        
+        # Update style prompt template
+        self.style_prompt_template = self._create_style_prompt_template()
+        
+        # Update learning progress
+        self.learning_progress['total_training_sessions'] += 1
+        self.learning_progress['total_samples_processed'] += len(feedback_pairs)
+        
+        # Record this training session
+        session_info = {
+            'timestamp': datetime.now().isoformat(),
+            'feedback_type': 'redline_revisions',
+            'feedback_pairs_count': len(feedback_pairs),
+            'vocabulary_additions': vocabulary_additions,
+            'phrase_additions': phrase_additions,
+            'tone_updates': tone_updates
+        }
+        self.training_history.append(session_info)
+        
+        console.print(f"✅ Applied redline feedback:")
+        console.print(f"  📝 Vocabulary additions: {vocabulary_additions}")
+        console.print(f"  💬 Phrase additions: {phrase_additions}")
+        console.print(f"  🎭 Tone updates: {tone_updates}")
+        
+        # Save updated model
+        self.save_model()
+    
+    def _extract_tone_specific_words(self, sentence: str, tone: str) -> List[str]:
+        """Extract tone-specific words from a sentence."""
+        sentence_lower = sentence.lower()
+        words = sentence_lower.split()
+        
+        tone_patterns = {
+            'formal': ['regarding', 'concerning', 'furthermore', 'moreover', 'nevertheless'],
+            'casual': ['hey', 'hi', 'thanks', 'cool', 'awesome', 'great'],
+            'professional': ['please', 'would', 'could', 'thank', 'appreciate'],
+            'emphatic': ['really', 'very', 'extremely', 'absolutely', 'definitely']
+        }
+        
+        if tone in tone_patterns:
+            return [word for word in words if word in tone_patterns[tone]]
+        
+        return []
+    
     # ... existing helper methods from LocalStyleModel ...
     def _analyze_sentence_structure(self, sentence: str) -> Dict[str, any]:
         """Analyze the structure of a sentence."""

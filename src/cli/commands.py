@@ -3,7 +3,7 @@
 import json
 import os
 import sys
-from typing import Optional, List
+from typing import Optional, List, Dict
 from pathlib import Path
 from datetime import datetime
 
@@ -912,6 +912,142 @@ def explore(model_path: str, detailed: bool, export_json: str):
         if settings.DEBUG:
             console.print_exception()
 
+@cli.command()
+@click.option('--style-folder', '-s', required=True, help='Folder containing writing style samples')
+@click.option('--input', '-i', required=True, help='Text to generate a response for')
+@click.option('--model', default=None, help='OpenAI model to use (defaults to config)')
+@click.option('--temperature', '-t', default=0.7, help='OpenAI temperature (0.0-1.0)')
+@click.option('--max-tokens', '-m', default=1000, help='Maximum tokens for response')
+@click.option('--output-file', '-o', help='Save final output to file')
+def redline(style_folder: str, input: str, model: str, temperature: float, max_tokens: int, output_file: str):
+    """Generate content and allow sentence-by-sentence redlining with feedback capture."""
+    
+    try:
+        # Validate settings
+        settings.validate()
+        
+        # Initialize components
+        file_processor = FileProcessor()
+        style_analyzer = StyleAnalyzer(file_processor)
+        openai_client = OpenAIClient(model=model)
+        
+        # Analyze style samples
+        console.print(f"📁 Analyzing style samples from: {style_folder}")
+        analysis_result = style_analyzer.analyze_style_folder(style_folder)
+        
+        # Generate initial response
+        console.print(f"\n🤖 Generating response with {model}...")
+        
+        result = openai_client.generate_response(
+            style_samples=analysis_result['samples'],
+            user_input=input,
+            temperature=temperature,
+            max_tokens=max_tokens
+        )
+        
+        original_response = result['response']
+        
+        # Start redline process
+        final_response = _handle_redline_mode(original_response, input, style_folder)
+        
+        # Display final result
+        console.print("\n" + "="*50)
+        console.print("[bold green]Final Response:[/bold green]")
+        console.print("="*50)
+        console.print(final_response)
+        console.print("="*50)
+        
+        # Show usage info
+        console.print(f"\n📊 Usage: {result['total_tokens']} tokens (${result['cost']:.4f})")
+        
+        # Save to file if requested
+        if output_file:
+            file_processor.save_output(final_response, output_file)
+            console.print(f"💾 Final response saved to: {output_file}")
+        
+    except Exception as e:
+        console.print(f"Error: {e}")
+        sys.exit(1)
+
+@cli.command()
+@click.option('--model-path', '-m', default='enhanced_style_model.pkl', help='Path to the trained model')
+@click.option('--feedback-file', '-f', default=None, help='Path to feedback file (defaults to settings)')
+@click.option('--apply-all', is_flag=True, help='Apply all feedback entries (default: prompt for each)')
+def apply_feedback(model_path: str, feedback_file: str, apply_all: bool):
+    """Apply redline feedback to the local model for training."""
+    
+    try:
+        # Validate settings
+        settings.validate()
+        
+        # Use default feedback file if not specified
+        if not feedback_file:
+            feedback_file = settings.FEEDBACK_FILE
+        
+        feedback_path = Path(feedback_file)
+        if not feedback_path.exists():
+            console.print(f"❌ Feedback file not found: {feedback_file}")
+            return
+        
+        # Load feedback data
+        with open(feedback_path, 'r', encoding='utf-8') as f:
+            feedback_data = json.load(f)
+        
+        if not feedback_data:
+            console.print("❌ No feedback data found in file.")
+            return
+        
+        # Filter for redline feedback
+        redline_feedback = [f for f in feedback_data if f.get('feedback_type') == 'redline_revisions']
+        
+        if not redline_feedback:
+            console.print("❌ No redline feedback found in file.")
+            return
+        
+        console.print(f"📊 Found {len(redline_feedback)} redline feedback entries")
+        
+        # Load the local model
+        from core.enhanced_style_model import EnhancedStyleModel
+        model = EnhancedStyleModel(model_path)
+        
+        # Process each feedback entry
+        applied_count = 0
+        for i, feedback in enumerate(redline_feedback, 1):
+            console.print(f"\n[bold]Feedback Entry {i}:[/bold]")
+            console.print(f"  Original Input: {feedback['original_input'][:100]}...")
+            console.print(f"  Revisions: {feedback['total_revisions']} sentence changes")
+            
+            if not apply_all:
+                if not Confirm.ask("Apply this feedback to the model?"):
+                    continue
+            
+            # Extract feedback pairs
+            feedback_pairs = feedback.get('feedback_pairs', [])
+            
+            # Update model with feedback
+            model.update_from_redline_feedback(feedback_pairs)
+            applied_count += 1
+            
+            console.print(f"  ✅ Applied {len(feedback_pairs)} revision pairs")
+        
+        # Save updated model
+        model.save_model()
+        
+        console.print(f"\n✅ Successfully applied {applied_count} feedback entries to model")
+        console.print(f"💾 Updated model saved to: {model_path}")
+        
+        # Show learning progress
+        learning_summary = model.get_learning_summary()
+        console.print(f"\n📈 Learning Progress:")
+        console.print(f"  Total sessions: {learning_summary['total_sessions']}")
+        console.print(f"  Best style score: {learning_summary['best_scores']['style']:.3f}")
+        console.print(f"  Best tone score: {learning_summary['best_scores']['tone']:.3f}")
+        
+    except Exception as e:
+        console.print(f"❌ Error applying feedback: {e}")
+        if settings.DEBUG:
+            console.print_exception()
+
 def _handle_edit_mode(original_response: str, user_input: str, style_folder: str) -> str:
     """Handle interactive editing mode."""
     console.print("\n[bold yellow]Edit Mode[/bold yellow]")
@@ -941,6 +1077,137 @@ def _handle_edit_mode(original_response: str, user_input: str, style_folder: str
     console.print(edited_response)
     
     return edited_response
+
+def _handle_redline_mode(original_response: str, user_input: str, style_folder: str) -> str:
+    """Handle sentence-by-sentence redlining mode with feedback capture."""
+    
+    import re
+    
+    # Split response into sentences
+    sentences = re.split(r'(?<=[.!?])\s+', original_response.strip())
+    sentences = [s.strip() for s in sentences if s.strip()]
+    
+    console.print("\n[bold yellow]🔴 Redline Mode[/bold yellow]")
+    console.print("Review the generated content sentence by sentence.")
+    console.print("\n" + "="*50)
+    
+    # Display numbered sentences
+    console.print("[bold]Generated Content:[/bold]")
+    for i, sentence in enumerate(sentences, 1):
+        console.print(f"Line {i}: {sentence}")
+    
+    # Store feedback pairs
+    feedback_pairs = []
+    current_sentences = sentences.copy()
+    
+    while True:
+        console.print(f"\n[bold cyan]Redline Commands:[/bold cyan] <number> | save | quit | show")
+        command = Prompt.ask("Command").strip().lower()
+        
+        if command == 'quit':
+            if Confirm.ask("Exit without saving changes?"):
+                console.print("❌ Exiting without saving changes.")
+                return original_response
+            continue
+            
+        elif command == 'save':
+            if feedback_pairs:
+                _save_redline_feedback(user_input, original_response, current_sentences, feedback_pairs, style_folder)
+                console.print("✅ Changes saved and feedback captured for training!")
+            else:
+                console.print("ℹ️  No changes made.")
+            break
+            
+        elif command == 'show':
+            console.print("\n[bold]Current Content:[/bold]")
+            for i, sentence in enumerate(current_sentences, 1):
+                console.print(f"Line {i}: {sentence}")
+            continue
+            
+        elif command.isdigit():
+            try:
+                line_num = int(command)
+                if 1 <= line_num <= len(current_sentences):
+                    original_sentence = current_sentences[line_num - 1]
+                    console.print(f"\n[bold]Editing Line {line_num}:[/bold]")
+                    console.print(f"Original: {original_sentence}")
+                    
+                    # Get new sentence
+                    new_sentence = Prompt.ask("New version")
+                    
+                    if new_sentence.strip() != original_sentence:
+                        # Store feedback pair
+                        feedback_pairs.append({
+                            'line_number': line_num,
+                            'before': original_sentence,
+                            'after': new_sentence.strip(),
+                            'feedback_type': 'sentence_revision'
+                        })
+                        
+                        # Update current sentences
+                        current_sentences[line_num - 1] = new_sentence.strip()
+                        
+                        console.print(f"✅ Line {line_num} updated!")
+                        
+                        # Show updated content
+                        console.print(f"\n[bold]Updated Line {line_num}:[/bold]")
+                        console.print(f"New: {new_sentence.strip()}")
+                    else:
+                        console.print("ℹ️  No changes made to this line.")
+                else:
+                    console.print(f"❌ Invalid line number. Valid range: 1-{len(current_sentences)}")
+            except ValueError:
+                console.print("❌ Invalid line number format.")
+            continue
+            
+        else:
+            console.print("❌ Unknown command. Use: <number> | save | quit | show")
+            continue
+    
+    # Return final content
+    return " ".join(current_sentences)
+
+def _save_redline_feedback(user_input: str, original_response: str, final_sentences: List[str], feedback_pairs: List[Dict], style_folder: str):
+    """Save redline feedback for training purposes."""
+    
+    feedback_data = {
+        'original_input': user_input,
+        'original_response': original_response,
+        'final_response': " ".join(final_sentences),
+        'style_folder': style_folder,
+        'timestamp': datetime.now().isoformat(),
+        'feedback_pairs': feedback_pairs,
+        'total_revisions': len(feedback_pairs),
+        'feedback_type': 'redline_revisions'
+    }
+    
+    try:
+        # Load existing feedback
+        feedback_file = Path(settings.FEEDBACK_FILE)
+        if feedback_file.exists():
+            with open(feedback_file, 'r', encoding='utf-8') as f:
+                existing_feedback = json.load(f)
+        else:
+            existing_feedback = []
+        
+        # Add new feedback
+        existing_feedback.append(feedback_data)
+        
+        # Save feedback
+        with open(feedback_file, 'w', encoding='utf-8') as f:
+            json.dump(existing_feedback, f, indent=2, ensure_ascii=False)
+        
+        console.print(f"💾 Redline feedback saved to {feedback_file}")
+        console.print(f"📊 Captured {len(feedback_pairs)} revision pairs for training")
+        
+        # Show summary of changes
+        if feedback_pairs:
+            console.print(f"\n[bold]Revision Summary:[/bold]")
+            for pair in feedback_pairs:
+                console.print(f"  Line {pair['line_number']}: '{pair['before'][:50]}...' → '{pair['after'][:50]}...'")
+        
+    except Exception as e:
+        console.print(f"❌ Failed to save redline feedback: {e}")
 
 def _save_feedback(original_input: str, generated_response: str, edited_response: str, style_folder: str):
     """Save feedback data for future improvements."""
