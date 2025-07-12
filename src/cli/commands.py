@@ -919,7 +919,9 @@ def explore(model_path: str, detailed: bool, export_json: str):
 @click.option('--temperature', '-t', default=0.7, help='OpenAI temperature (0.0-1.0)')
 @click.option('--max-tokens', '-m', default=1000, help='Maximum tokens for response')
 @click.option('--output-file', '-o', help='Save final output to file')
-def redline(style_folder: str, input: str, model: str, temperature: float, max_tokens: int, output_file: str):
+@click.option('--spell-check', is_flag=True, help='Enable spell checking during editing using local LLM')
+@click.option('--spell-check-backend', default='gpt4all-gpt4all-j', help='Local LLM backend for spell checking')
+def redline(style_folder: str, input: str, model: str, temperature: float, max_tokens: int, output_file: str, spell_check: bool, spell_check_backend: str):
     """Generate content and allow sentence-by-sentence redlining with feedback capture."""
     
     try:
@@ -948,7 +950,7 @@ def redline(style_folder: str, input: str, model: str, temperature: float, max_t
         original_response = result['response']
         
         # Start redline process
-        final_response = _handle_redline_mode(original_response, input, style_folder)
+        final_response = _handle_redline_mode(original_response, input, style_folder, spell_check, spell_check_backend)
         
         # Display final result
         console.print("\n" + "="*50)
@@ -1078,7 +1080,51 @@ def _handle_edit_mode(original_response: str, user_input: str, style_folder: str
     
     return edited_response
 
-def _handle_redline_mode(original_response: str, user_input: str, style_folder: str) -> str:
+def _spell_check_sentence(sentence: str, backend: str = 'gpt4all-gpt4all-j') -> str:
+    """Spell check a sentence using a local LLM."""
+    try:
+        from core.llm_backends import create_backend_manager
+        
+        backend_manager = create_backend_manager()
+        available = backend_manager.list_backends()
+        # Try exact match first
+        selected_backend = backend if backend in available else None
+        # If not found, try partial match
+        if not selected_backend:
+            for b in available:
+                if backend in b:
+                    selected_backend = b
+                    break
+        if not selected_backend:
+            console.print(f"⚠️  Backend '{backend}' not found. Available: {available}")
+            return sentence
+        if not backend_manager.set_backend(selected_backend):
+            console.print(f"⚠️  Could not set backend '{selected_backend}'")
+            return sentence
+        spell_check_prompt = f"""Correct any spelling errors in this sentence: "{sentence}"
+
+Corrected version:"""
+        response = backend_manager.generate(spell_check_prompt, max_tokens=100, temperature=0.1)
+        if response and response.strip() and response.strip() != "Model not loaded" and response.strip() != "Generation failed":
+            # Clean up the response - remove quotes and extra text
+            cleaned_response = response.strip()
+            # Remove quotes if present
+            if cleaned_response.startswith('"') and cleaned_response.endswith('"'):
+                cleaned_response = cleaned_response[1:-1]
+            # Remove the original sentence if it appears in the response
+            if sentence in cleaned_response:
+                cleaned_response = cleaned_response.replace(sentence, '').strip()
+            # If the response is too long or contains the prompt, return original
+            if len(cleaned_response) > len(sentence) * 2 or "Corrected version:" in cleaned_response:
+                return sentence
+            return cleaned_response if cleaned_response else sentence
+        else:
+            return sentence
+    except Exception as e:
+        console.print(f"⚠️  Spell check failed: {e}")
+        return sentence
+
+def _handle_redline_mode(original_response: str, user_input: str, style_folder: str, spell_check: bool = False, spell_check_backend: str = 'gpt4all-gpt4all-j') -> str:
     """Handle sentence-by-sentence redlining mode with feedback capture."""
     
     import re
@@ -1143,6 +1189,16 @@ def _handle_redline_mode(original_response: str, user_input: str, style_folder: 
                         console.print("🔄 Cancelled editing - back to main menu")
                         continue
                     elif new_sentence.strip() != original_sentence:
+                        # Spell check if enabled
+                        if spell_check:
+                            spell_checked_sentence = _spell_check_sentence(new_sentence.strip(), spell_check_backend)
+                            if spell_checked_sentence != new_sentence.strip():
+                                console.print(f"🔍 Spell check suggests: {spell_checked_sentence}")
+                                if Confirm.ask("Use spell-checked version?"):
+                                    new_sentence = spell_checked_sentence
+                                    console.print("✅ Using spell-checked version")
+                                else:
+                                    console.print("ℹ️  Keeping original version")
                         # Store feedback pair
                         feedback_pairs.append({
                             'line_number': line_num,

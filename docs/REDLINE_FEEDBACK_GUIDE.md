@@ -132,7 +132,14 @@ The model learns from your corrections and improves future generations.
 
 #### **Step 1: Generate Content**
 ```bash
+# Basic redline
 inkmod redline --style-folder ./writing-samples --input "Write a professional email"
+
+# Redline with spell checking
+inkmod redline --style-folder ./writing-samples --input "Write a professional email" --spell-check
+
+# Redline with custom spell check backend
+inkmod redline --style-folder ./writing-samples --input "Write a professional email" --spell-check --spell-check-backend llama-7b
 ```
 
 #### **Step 2: Review and Edit**
@@ -147,6 +154,9 @@ Command: 1
 Editing Line 1:
 Original: Hello there! I hope this email finds you well.
 New version (or 'back' to cancel): Hi there! I hope you're doing well.
+🔍 Spell check suggests: Hi there! I hope you're doing well.
+Use spell-checked version? (y/N): y
+✅ Using spell-checked version
 ✅ Line 1 updated!
 ```
 
@@ -192,6 +202,18 @@ New version (or 'back' to cancel): back
 🔄 Cancelled editing - back to main menu
 ```
 
+### **Spell Check Integration**
+```
+Command: 1
+Editing Line 1:
+Original: Hello there! I hope this email finds you well.
+New version (or 'back' to cancel): Hi there! I hope your doing well.
+🔍 Spell check suggests: Hi there! I hope you're doing well.
+Use spell-checked version? (y/N): y
+✅ Using spell-checked version
+✅ Line 1 updated!
+```
+
 ### **Batch Feedback Application**
 ```bash
 # Apply all feedback entries
@@ -199,6 +221,18 @@ inkmod apply-feedback --model-path enhanced_style_model.pkl --apply-all
 
 # Apply specific feedback file
 inkmod apply-feedback --model-path enhanced_style_model.pkl --feedback-file custom_feedback.json
+```
+
+### **Spell Check Features**
+```bash
+# Enable spell checking with default backend (gpt4all-j)
+inkmod redline --style-folder ./writing-samples --input "Write an email" --spell-check
+
+# Use custom spell check backend
+inkmod redline --style-folder ./writing-samples --input "Write an email" --spell-check --spell-check-backend llama-7b
+
+# Available backends for spell checking
+inkmod backends --list
 ```
 
 ### **Feedback Review**
@@ -266,6 +300,11 @@ inkmod learning-progress
 #### **Stuck in Edit Mode**
 - **Cause**: Accidentally typed wrong number or got confused
 - **Solution**: Type 'back' when prompted for new version to cancel and return to main menu
+
+#### **Spell Check Not Working**
+- **Cause**: Local LLM backend not available or failed to load
+- **Solution**: Check available backends with `inkmod backends --list` and try a different backend
+- **Alternative**: Disable spell check with `--no-spell-check` flag
 
 ### **Debug Commands**
 ```bash

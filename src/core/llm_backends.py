@@ -189,7 +189,7 @@ class HuggingFaceBackend(LLMBackend):
             self.model = AutoModelForCausalLM.from_pretrained(
                 self.model_path,
                 torch_dtype=torch.float16 if self.config.get('use_half_precision', True) else torch.float32,
-                device_map=self.config.get('device_map', 'auto')
+                device_map=self.config.get('device_map', None)
             )
             
             # Set pad token if not present
@@ -345,14 +345,14 @@ MODEL_CONFIGS = {
             'model_path': 'distilgpt2',
             'config': {
                 'use_half_precision': True,
-                'device_map': 'auto'
+                'device_map': None
             }
         },
         'tiny-llama': {
             'model_path': 'TinyLlama/TinyLlama-1.1B-Chat-v1.0',
             'config': {
                 'use_half_precision': True,
-                'device_map': 'auto'
+                'device_map': None
             }
         }
     }

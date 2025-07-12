@@ -266,7 +266,11 @@ inkmod generate --style-folder ./writing-samples --input "Write a blog post" --e
 
 Generate content and edit it sentence by sentence with precise feedback capture:
 ```bash
-inkmod redline --style-folder ./writing-samples --input "Write a professional email"
+# Basic redline with spell checking
+inkmod redline --style-folder ./writing-samples --input "Write a professional email" --spell-check
+
+# Redline with custom spell check backend
+inkmod redline --style-folder ./writing-samples --input "Write a professional email" --spell-check --spell-check-backend llama-7b
 ```
 
 **Redline Commands:**
@@ -275,6 +279,10 @@ inkmod redline --style-folder ./writing-samples --input "Write a professional em
 - `save` - Save changes and capture feedback
 - `quit` - Exit without saving
 - `back` - Go back to main menu (when editing a line, type 'back' to cancel)
+
+**Spell Check Options:**
+- `--spell-check` - Enable spell checking during editing
+- `--spell-check-backend` - Choose local LLM backend for spell checking (default: gpt4all-j)
 
 **Example Workflow:**
 ```
@@ -289,6 +297,9 @@ Command: 1
 Editing Line 1:
 Original: Hello there! I hope this email finds you well.
 New version (or 'back' to cancel): Hi there! I hope you're doing well.
+🔍 Spell check suggests: Hi there! I hope you're doing well.
+Use spell-checked version? (y/N): y
+✅ Using spell-checked version
 ✅ Line 1 updated!
 
 Command: save
