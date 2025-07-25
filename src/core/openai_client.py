@@ -86,6 +86,57 @@ class OpenAIClient:
             console.print(f"❌ OpenAI API error: {e}")
             raise
     
+    def generate_response_with_prompt(
+        self,
+        prompt: str,
+        temperature: float = 0.7,
+        max_tokens: int = 1000,
+        system_prompt: Optional[str] = None
+    ) -> Dict[str, any]:
+        """Generate a response using a custom prompt."""
+        
+        # Count tokens and estimate cost
+        prompt_tokens = self.count_tokens(prompt)
+        estimated_completion_tokens = max_tokens
+        
+        console.print(f"📊 Prompt tokens: {prompt_tokens}")
+        console.print(f"💰 Estimated cost: ${self.estimate_cost(prompt_tokens, estimated_completion_tokens):.4f}")
+        
+        try:
+            with Progress() as progress:
+                task = progress.add_task("Generating response...", total=None)
+                
+                response = self.client.chat.completions.create(
+                    model=self.model,
+                    messages=[
+                        {"role": "system", "content": self._get_system_prompt(system_prompt)},
+                        {"role": "user", "content": prompt}
+                    ],
+                    temperature=temperature,
+                    max_tokens=max_tokens
+                )
+                
+                progress.update(task, completed=True)
+            
+            completion = response.choices[0].message.content
+            actual_completion_tokens = response.usage.completion_tokens
+            total_tokens = response.usage.total_tokens
+            
+            actual_cost = self.estimate_cost(prompt_tokens, actual_completion_tokens)
+            
+            return {
+                'response': completion,
+                'prompt_tokens': prompt_tokens,
+                'completion_tokens': actual_completion_tokens,
+                'total_tokens': total_tokens,
+                'cost': actual_cost,
+                'model': self.model
+            }
+            
+        except Exception as e:
+            console.print(f"❌ OpenAI API error: {e}")
+            raise
+    
     def _build_prompt(self, style_samples: Dict[str, str], user_input: str, system_prompt: Optional[str] = None) -> str:
         """Build the prompt for style mirroring."""
         from utils.text_utils import combine_style_samples, extract_style_summary

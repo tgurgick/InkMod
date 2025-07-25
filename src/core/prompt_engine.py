@@ -208,4 +208,51 @@ class PromptEngine:
     
     def get_available_templates(self) -> List[str]:
         """Get list of available prompt templates."""
-        return list(self.prompt_templates.keys()) 
+        return list(self.prompt_templates.keys())
+    
+    def create_document_improvement_prompt(
+        self,
+        style_samples: Dict[str, str],
+        document_content: str,
+        style_summary: str
+    ) -> str:
+        """Create a prompt for document analysis and improvement."""
+        
+        # Build style context
+        style_context = self._build_style_context(style_samples)
+        
+        prompt_parts = [
+            style_context,
+            "",
+            "You are an expert writing style analyst and editor. Your task is to analyze the following document against the writing style shown in the samples above, and provide:",
+            "",
+            "1. A detailed analysis of how well the document matches the target style",
+            "2. Specific improvements to make the document better match the style",
+            "3. A complete improved version of the document",
+            "",
+            "Document to analyze:",
+            "---",
+            document_content,
+            "---",
+            "",
+            "Please provide your response in the following JSON format:",
+            "{",
+            '  "analysis": "Detailed analysis of style match and areas for improvement",',
+            '  "specific_changes": [',
+            '    "Change 1: description of specific improvement",',
+            '    "Change 2: description of specific improvement"',
+            '  ],',
+            '  "improved_version": "Complete improved version of the document"',
+            "}",
+            "",
+            "Focus on:",
+            "- Vocabulary and word choice",
+            "- Sentence structure and length",
+            "- Tone and formality level",
+            "- Paragraph organization",
+            "- Overall flow and readability",
+            "",
+            "Response:"
+        ]
+        
+        return "\n".join(prompt_parts) 

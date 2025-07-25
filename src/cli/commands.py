@@ -184,11 +184,15 @@ def batch(style_folder, input_file, output_file, temperature, max_tokens, model)
 
 @cli.command()
 @click.option('--style-folder', '-s', required=True, help='Folder containing writing style samples')
+@click.option('--input', '-i', required=True, help='Text to generate a response for')
+@click.option('--model', default=None, help='OpenAI model to use (defaults to config)')
 @click.option('--temperature', '-t', default=0.7, help='OpenAI temperature (0.0-1.0)')
 @click.option('--max-tokens', '-m', default=1000, help='Maximum tokens for response')
-@click.option('--model', default=None, help='OpenAI model to use')
-def interactive(style_folder, temperature, max_tokens, model):
-    """Start interactive mode for real-time style mirroring."""
+@click.option('--output-file', '-o', help='Save final output to file')
+@click.option('--spell-check', is_flag=True, help='Enable spell checking during editing using local LLM')
+@click.option('--spell-check-backend', default='pyspellchecker', help='Spell checker backend (currently only pyspellchecker supported)')
+def redline(style_folder: str, input: str, model: str, temperature: float, max_tokens: int, output_file: str, spell_check: bool, spell_check_backend: str):
+    """Generate content and allow sentence-by-sentence redlining with feedback capture."""
     
     try:
         # Validate settings
@@ -203,53 +207,169 @@ def interactive(style_folder, temperature, max_tokens, model):
         console.print(f"📁 Analyzing style samples from: {style_folder}")
         analysis_result = style_analyzer.analyze_style_folder(style_folder)
         
-        # Show welcome message
-        welcome_text = Text("InkMod Interactive Mode", style="bold blue")
-        console.print(Panel(welcome_text, title="Welcome"))
-        console.print("Enter your requests and get style-matched responses.")
-        console.print("Type 'quit' or 'exit' to end the session.\n")
+        # Generate initial response
+        console.print(f"\n🤖 Generating response with {model}...")
         
-        # Interactive loop
-        while True:
-            try:
-                user_input = Prompt.ask("\n[bold cyan]Your request[/bold cyan]")
-                
-                if user_input.lower() in ['quit', 'exit', 'q']:
-                    console.print("👋 Goodbye!")
-                    break
-                
-                if not user_input.strip():
-                    continue
-                
-                # Generate response
-                console.print("🤖 Generating response...")
-                result = openai_client.generate_response(
-                    style_samples=analysis_result['samples'],
-                    user_input=user_input,
-                    temperature=temperature,
-                    max_tokens=max_tokens
-                )
-                
-                # Display response
-                console.print("\n[bold green]Response:[/bold green]")
-                console.print(result['response'])
-                console.print(f"\n📊 Tokens: {result['total_tokens']} (${result['cost']:.4f})")
-                
-                # Ask for feedback
-                if Confirm.ask("Would you like to edit this response?"):
-                    edited_response = _handle_edit_mode(result['response'], user_input, style_folder)
-                    if edited_response != result['response']:
-                        _save_feedback(user_input, result['response'], edited_response, style_folder)
-                
-            except KeyboardInterrupt:
-                console.print("\n👋 Goodbye!")
-                break
-            except Exception as e:
-                console.print(f"Error: {e}")
-                continue
+        result = openai_client.generate_response(
+            style_samples=analysis_result['samples'],
+            user_input=input,
+            temperature=temperature,
+            max_tokens=max_tokens
+        )
+        
+        original_response = result['response']
+        
+        # Start redline process
+        final_response = _handle_redline_mode(original_response, input, style_folder, spell_check, spell_check_backend)
+        
+        # Display final result
+        console.print("\n" + "="*50)
+        console.print("[bold green]Final Response:[/bold green]")
+        console.print("="*50)
+        console.print(final_response)
+        console.print("="*50)
+        
+        # Show usage info
+        console.print(f"\n📊 Usage: {result['total_tokens']} tokens (${result['cost']:.4f})")
+        
+        # Save to file if requested
+        if output_file:
+            file_processor.save_output(final_response, output_file)
+            console.print(f"💾 Final response saved to: {output_file}")
         
     except Exception as e:
         console.print(f"Error: {e}")
+        sys.exit(1)
+
+@cli.command()
+@click.option('--style-folder', '-s', required=True, help='Folder containing writing style samples')
+@click.option('--document', '-d', required=True, help='Path to the document to analyze and improve')
+@click.option('--output-file', '-o', help='Save improved version to file')
+@click.option('--model', default=None, help='OpenAI model to use (defaults to config)')
+@click.option('--temperature', '-t', default=0.7, help='OpenAI temperature (0.0-1.0)')
+@click.option('--max-tokens', '-m', default=2000, help='Maximum tokens for response')
+@click.option('--show-analysis', is_flag=True, help='Show detailed style analysis')
+@click.option('--edit-mode', is_flag=True, help='Enable interactive editing mode for the improved version')
+def improve(style_folder: str, document: str, output_file: str, model: str, temperature: float, max_tokens: int, show_analysis: bool, edit_mode: bool):
+    """Analyze a document against your writing style and provide improvements."""
+    
+    try:
+        # Validate settings
+        settings.validate()
+        
+        # Initialize components
+        file_processor = FileProcessor()
+        style_analyzer = StyleAnalyzer(file_processor)
+        openai_client = OpenAIClient(model=model)
+        prompt_engine = PromptEngine()
+        
+        # Load the document to improve
+        console.print(f"📄 Loading document: {document}")
+        try:
+            with open(document, 'r', encoding='utf-8') as f:
+                document_content = f.read()
+        except FileNotFoundError:
+            console.print(f"❌ Error: Document '{document}' not found")
+            sys.exit(1)
+        except Exception as e:
+            console.print(f"❌ Error reading document: {e}")
+            sys.exit(1)
+        
+        # Analyze style samples
+        console.print(f"📁 Analyzing style samples from: {style_folder}")
+        analysis_result = style_analyzer.analyze_style_folder(style_folder)
+        
+        if show_analysis:
+            style_analyzer.display_style_analysis(analysis_result)
+        
+        # Generate document analysis and improvements
+        console.print(f"\n🔍 Analyzing document against your writing style...")
+        
+        # Create a specialized prompt for document improvement
+        improvement_prompt = prompt_engine.create_document_improvement_prompt(
+            style_samples=analysis_result['samples'],
+            document_content=document_content,
+            style_summary=analysis_result['style_summary']
+        )
+        
+        result = openai_client.generate_response_with_prompt(
+            prompt=improvement_prompt,
+            temperature=temperature,
+            max_tokens=max_tokens
+        )
+        
+        # Parse the response to extract analysis and improved version
+        try:
+            # Try to parse as JSON first
+            import json
+            import re
+            
+            # Clean up the response - remove any markdown formatting
+            clean_response = result['response'].strip()
+            if clean_response.startswith('```json'):
+                clean_response = clean_response[7:]
+            if clean_response.endswith('```'):
+                clean_response = clean_response[:-3]
+            clean_response = clean_response.strip()
+            
+            parsed_result = json.loads(clean_response)
+            analysis = parsed_result.get('analysis', '')
+            improved_version = parsed_result.get('improved_version', '')
+            specific_changes = parsed_result.get('specific_changes', [])
+            
+        except (json.JSONDecodeError, KeyError) as e:
+            # Fallback to text parsing
+            console.print(f"⚠️  JSON parsing failed: {e}")
+            console.print("📝 Using raw response as analysis...")
+            analysis = result['response']
+            improved_version = ""
+            specific_changes = []
+        
+        # Display results
+        console.print("\n" + "="*60)
+        console.print("[bold blue]Document Analysis & Improvement[/bold blue]")
+        console.print("="*60)
+        
+        # Show analysis
+        if analysis:
+            console.print("\n[bold yellow]📊 Style Analysis:[/bold yellow]")
+            console.print("-" * 40)
+            console.print(analysis)
+        
+        # Show specific changes
+        if specific_changes:
+            console.print("\n[bold yellow]🔧 Specific Improvements:[/bold yellow]")
+            console.print("-" * 40)
+            for i, change in enumerate(specific_changes, 1):
+                console.print(f"{i}. {change}")
+        
+        # Show improved version
+        if improved_version:
+            console.print("\n[bold green]✨ Improved Version:[/bold green]")
+            console.print("-" * 40)
+            console.print(improved_version)
+            console.print("-" * 40)
+            
+            # Handle edit mode for the improved version
+            if edit_mode:
+                final_version = _handle_edit_mode(improved_version, f"Improve document: {document}", style_folder)
+                if final_version != improved_version:
+                    improved_version = final_version
+                    _save_feedback(f"Improve document: {document}", improved_version, final_version, style_folder)
+        else:
+            console.print("\n[bold red]⚠️  No improved version generated[/bold red]")
+            console.print("The analysis was provided, but no improved version was created.")
+        
+        # Show usage info
+        console.print(f"\n📊 Usage: {result['total_tokens']} tokens (${result['cost']:.4f})")
+        
+        # Save to file if requested
+        if output_file and improved_version:
+            file_processor.save_output(improved_version, output_file)
+            console.print(f"💾 Improved version saved to: {output_file}")
+        
+    except Exception as e:
+        console.print(f"❌ Error: {e}")
         sys.exit(1)
 
 @cli.command()
@@ -920,7 +1040,7 @@ def explore(model_path: str, detailed: bool, export_json: str):
 @click.option('--max-tokens', '-m', default=1000, help='Maximum tokens for response')
 @click.option('--output-file', '-o', help='Save final output to file')
 @click.option('--spell-check', is_flag=True, help='Enable spell checking during editing using local LLM')
-@click.option('--spell-check-backend', default='gpt4all-gpt4all-j', help='Local LLM backend for spell checking')
+@click.option('--spell-check-backend', default='pyspellchecker', help='Spell checker backend (currently only pyspellchecker supported)')
 def redline(style_folder: str, input: str, model: str, temperature: float, max_tokens: int, output_file: str, spell_check: bool, spell_check_backend: str):
     """Generate content and allow sentence-by-sentence redlining with feedback capture."""
     
@@ -1080,51 +1200,44 @@ def _handle_edit_mode(original_response: str, user_input: str, style_folder: str
     
     return edited_response
 
-def _spell_check_sentence(sentence: str, backend: str = 'gpt4all-gpt4all-j') -> str:
-    """Spell check a sentence using a local LLM."""
+def _spell_check_sentence(sentence: str, backend: str = 'pyspellchecker') -> str:
+    """Spell check a sentence using pyspellchecker."""
     try:
-        from core.llm_backends import create_backend_manager
+        from spellchecker import SpellChecker
         
-        backend_manager = create_backend_manager()
-        available = backend_manager.list_backends()
-        # Try exact match first
-        selected_backend = backend if backend in available else None
-        # If not found, try partial match
-        if not selected_backend:
-            for b in available:
-                if backend in b:
-                    selected_backend = b
-                    break
-        if not selected_backend:
-            console.print(f"⚠️  Backend '{backend}' not found. Available: {available}")
-            return sentence
-        if not backend_manager.set_backend(selected_backend):
-            console.print(f"⚠️  Could not set backend '{selected_backend}'")
-            return sentence
-        spell_check_prompt = f"""Correct any spelling errors in this sentence: "{sentence}"
-
-Corrected version:"""
-        response = backend_manager.generate(spell_check_prompt, max_tokens=100, temperature=0.1)
-        if response and response.strip() and response.strip() != "Model not loaded" and response.strip() != "Generation failed":
-            # Clean up the response - remove quotes and extra text
-            cleaned_response = response.strip()
-            # Remove quotes if present
-            if cleaned_response.startswith('"') and cleaned_response.endswith('"'):
-                cleaned_response = cleaned_response[1:-1]
-            # Remove the original sentence if it appears in the response
-            if sentence in cleaned_response:
-                cleaned_response = cleaned_response.replace(sentence, '').strip()
-            # If the response is too long or contains the prompt, return original
-            if len(cleaned_response) > len(sentence) * 2 or "Corrected version:" in cleaned_response:
-                return sentence
-            return cleaned_response if cleaned_response else sentence
+        # Initialize spell checker
+        spell = SpellChecker()
+        
+        # Split sentence into words
+        words = sentence.split()
+        corrected_words = []
+        
+        for word in words:
+            # Check if word is misspelled
+            if word.lower() in spell:
+                corrected_words.append(word)
+            else:
+                # Get the most likely correction
+                correction = spell.correction(word)
+                if correction:
+                    corrected_words.append(correction)
+                else:
+                    corrected_words.append(word)
+        
+        corrected_sentence = ' '.join(corrected_words)
+        
+        # Only return corrected version if there were changes
+        if corrected_sentence != sentence:
+            console.print(f"🔍 Spell check suggests: {corrected_sentence}")
+            return corrected_sentence
         else:
             return sentence
+            
     except Exception as e:
         console.print(f"⚠️  Spell check failed: {e}")
         return sentence
 
-def _handle_redline_mode(original_response: str, user_input: str, style_folder: str, spell_check: bool = False, spell_check_backend: str = 'gpt4all-gpt4all-j') -> str:
+def _handle_redline_mode(original_response: str, user_input: str, style_folder: str, spell_check: bool = False, spell_check_backend: str = 'pyspellchecker') -> str:
     """Handle sentence-by-sentence redlining mode with feedback capture."""
     
     import re
@@ -1191,14 +1304,19 @@ def _handle_redline_mode(original_response: str, user_input: str, style_folder: 
                     elif new_sentence.strip() != original_sentence:
                         # Spell check if enabled
                         if spell_check:
-                            spell_checked_sentence = _spell_check_sentence(new_sentence.strip(), spell_check_backend)
-                            if spell_checked_sentence != new_sentence.strip():
-                                console.print(f"🔍 Spell check suggests: {spell_checked_sentence}")
-                                if Confirm.ask("Use spell-checked version?"):
-                                    new_sentence = spell_checked_sentence
-                                    console.print("✅ Using spell-checked version")
-                                else:
-                                    console.print("ℹ️  Keeping original version")
+                            try:
+                                spell_checked_sentence = _spell_check_sentence(new_sentence.strip(), spell_check_backend)
+                                if spell_checked_sentence != new_sentence.strip():
+                                    console.print(f"🔍 Spell check suggests: {spell_checked_sentence}")
+                                    if Confirm.ask("Use spell-checked version?"):
+                                        new_sentence = spell_checked_sentence
+                                        console.print("✅ Using spell-checked version")
+                                    else:
+                                        console.print("ℹ️  Keeping original version")
+                            except Exception as e:
+                                console.print(f"⚠️  Spell check unavailable: {e}")
+                                console.print("ℹ️  Continuing without spell check...")
+                        
                         # Store feedback pair
                         feedback_pairs.append({
                             'line_number': line_num,

@@ -52,8 +52,8 @@ def test_style_analyzer():
     # Test validation with empty samples
     assert not analyzer.validate_style_samples({})
     
-    # Test validation with minimal samples
-    minimal_samples = {'test.txt': 'This is a test.'}
+    # Test validation with minimal samples (needs at least 100 characters)
+    minimal_samples = {'test.txt': 'This is a test sentence with enough characters to pass the validation check. It should have more than 100 characters to be considered valid for style analysis.'}
     assert analyzer.validate_style_samples(minimal_samples)
 
 if __name__ == '__main__':

@@ -138,8 +138,8 @@ inkmod redline --style-folder ./writing-samples --input "Write a professional em
 # Redline with spell checking
 inkmod redline --style-folder ./writing-samples --input "Write a professional email" --spell-check
 
-# Redline with custom spell check backend
-inkmod redline --style-folder ./writing-samples --input "Write a professional email" --spell-check --spell-check-backend llama-7b
+# Redline with spell checking (using pyspellchecker)
+inkmod redline --style-folder ./writing-samples --input "Write a professional email" --spell-check
 ```
 
 #### **Step 2: Review and Edit**
@@ -225,14 +225,11 @@ inkmod apply-feedback --model-path enhanced_style_model.pkl --feedback-file cust
 
 ### **Spell Check Features**
 ```bash
-# Enable spell checking with default backend (gpt4all-j)
+# Enable spell checking with pyspellchecker
 inkmod redline --style-folder ./writing-samples --input "Write an email" --spell-check
 
-# Use custom spell check backend
-inkmod redline --style-folder ./writing-samples --input "Write an email" --spell-check --spell-check-backend llama-7b
-
-# Available backends for spell checking
-inkmod backends --list
+# Spell checking uses pyspellchecker for fast, accurate corrections
+# No additional backend setup required
 ```
 
 ### **Feedback Review**
@@ -302,9 +299,9 @@ inkmod learning-progress
 - **Solution**: Type 'back' when prompted for new version to cancel and return to main menu
 
 #### **Spell Check Not Working**
-- **Cause**: Local LLM backend not available or failed to load
-- **Solution**: Check available backends with `inkmod backends --list` and try a different backend
-- **Alternative**: Disable spell check with `--no-spell-check` flag
+- **Cause**: pyspellchecker not installed or import error
+- **Solution**: Install with `pip install pyspellchecker`
+- **Alternative**: Disable spell check by not using the `--spell-check` flag
 
 ### **Debug Commands**
 ```bash

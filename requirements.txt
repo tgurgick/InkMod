@@ -19,4 +19,7 @@ pathlib2>=2.3.0
 # torch>=2.0.0
 
 # NLP metrics for hybrid reward function
-nltk>=3.8.0 
+nltk>=3.8.0
+
+# Spell checking
+pyspellchecker>=0.8.0 

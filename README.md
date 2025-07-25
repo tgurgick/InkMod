@@ -140,6 +140,7 @@ InkMod uses a comprehensive scoring system to evaluate style matching quality:
 
 - **Style Analysis**: Analyze writing samples to understand tone, vocabulary, and structure
 - **Style Mirroring**: Generate responses that match the analyzed writing style
+- **Document Improvement**: Analyze existing documents against your style and get improvements
 - **Style Validation**: Compare different analysis methods and validate their effectiveness
 - **Reinforcement Learning**: Train a local model using OpenAI as teacher
 - **Continuous Learning**: Model remembers and improves with each session
@@ -255,6 +256,27 @@ Process multiple inputs from a file:
 inkmod batch --style-folder ./writing-samples --input-file inputs.txt --output-file outputs.txt
 ```
 
+### Document Improvement
+
+Analyze an existing document against your writing style and get improvements:
+```bash
+# Basic document improvement
+inkmod improve --style-folder ./writing-samples --document my_document.txt
+
+# With detailed analysis and save to file
+inkmod improve --style-folder ./writing-samples --document my_document.txt --show-analysis --output-file improved_document.txt
+
+# With interactive editing of the improved version
+inkmod improve --style-folder ./writing-samples --document my_document.txt --edit-mode
+```
+
+This feature:
+- Analyzes your document against your writing style samples
+- Provides detailed feedback on style mismatches
+- Lists specific improvements needed
+- Generates an improved version that better matches your style
+- Supports interactive editing of the improved version
+
 ### Edit Mode (with feedback)
 
 Generate and edit responses while capturing feedback:
@@ -269,8 +291,8 @@ Generate content and edit it sentence by sentence with precise feedback capture:
 # Basic redline with spell checking
 inkmod redline --style-folder ./writing-samples --input "Write a professional email" --spell-check
 
-# Redline with custom spell check backend
-inkmod redline --style-folder ./writing-samples --input "Write a professional email" --spell-check --spell-check-backend llama-7b
+# Redline with spell checking (using pyspellchecker)
+inkmod redline --style-folder ./writing-samples --input "Write a professional email" --spell-check
 ```
 
 **Redline Commands:**
@@ -281,8 +303,8 @@ inkmod redline --style-folder ./writing-samples --input "Write a professional em
 - `back` - Go back to main menu (when editing a line, type 'back' to cancel)
 
 **Spell Check Options:**
-- `--spell-check` - Enable spell checking during editing
-- `--spell-check-backend` - Choose local LLM backend for spell checking (default: gpt4all-j)
+- `--spell-check` - Enable spell checking during editing (uses pyspellchecker)
+- `--spell-check-backend` - Choose spell checker backend (currently only pyspellchecker supported)
 
 **Example Workflow:**
 ```
