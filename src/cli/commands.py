@@ -250,7 +250,8 @@ def redline(style_folder: str, input: str, model: str, temperature: float, max_t
 @click.option('--max-tokens', '-m', default=2000, help='Maximum tokens for response')
 @click.option('--show-analysis', is_flag=True, help='Show detailed style analysis')
 @click.option('--edit-mode', is_flag=True, help='Enable interactive editing mode for the improved version')
-def improve(style_folder: str, document: str, output_file: str, model: str, temperature: float, max_tokens: int, show_analysis: bool, edit_mode: bool):
+@click.option('--backend', '-b', help='Local LLM backend to use (e.g., llama-7b, gpt4all-j, hf-distilgpt2)')
+def improve(style_folder: str, document: str, output_file: str, model: str, temperature: float, max_tokens: int, show_analysis: bool, edit_mode: bool, backend: str):
     """Analyze a document against your writing style and provide improvements."""
     
     try:
@@ -260,8 +261,28 @@ def improve(style_folder: str, document: str, output_file: str, model: str, temp
         # Initialize components
         file_processor = FileProcessor()
         style_analyzer = StyleAnalyzer(file_processor)
-        openai_client = OpenAIClient(model=model)
         prompt_engine = PromptEngine()
+        
+        # Initialize AI client based on backend preference
+        if backend:
+            # Use local model
+            from core.llm_backends import create_backend_manager
+            backend_manager = create_backend_manager()
+            
+            available_backends = backend_manager.list_backends()
+            if backend not in available_backends:
+                console.print(f"❌ Error: Backend '{backend}' is not available")
+                console.print("Available backends:")
+                for backend_name in available_backends:
+                    console.print(f"  - {backend_name}")
+                sys.exit(1)
+            
+            console.print(f"🤖 Using local backend: {backend}")
+            backend_manager.set_backend(backend)
+            openai_client = None  # We'll use local backend instead
+        else:
+            # Use OpenAI
+            openai_client = OpenAIClient(model=model)
         
         # Load the document to improve
         console.print(f"📄 Loading document: {document}")
@@ -292,11 +313,26 @@ def improve(style_folder: str, document: str, output_file: str, model: str, temp
             style_summary=analysis_result['style_summary']
         )
         
-        result = openai_client.generate_response_with_prompt(
-            prompt=improvement_prompt,
-            temperature=temperature,
-            max_tokens=max_tokens
-        )
+        # Generate response using appropriate backend
+        if backend:
+            # Use local backend
+            response_text = backend_manager.generate(
+                prompt=improvement_prompt,
+                max_tokens=max_tokens,
+                temperature=temperature
+            )
+            result = {
+                'response': response_text,
+                'total_tokens': len(response_text.split()),  # Rough estimate
+                'cost': 0.0  # Local models are free
+            }
+        else:
+            # Use OpenAI
+            result = openai_client.generate_response_with_prompt(
+                prompt=improvement_prompt,
+                temperature=temperature,
+                max_tokens=max_tokens
+            )
         
         # Parse the response to extract analysis and improved version
         try:
